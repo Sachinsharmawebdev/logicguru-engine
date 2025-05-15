@@ -17,7 +17,7 @@ A powerful, async-ready JSON-based logic rule engine for evaluating nested condi
 ## 📦 Installation
 
 ```bash
-npm install logic-rule-engine
+npm install logicguru-engine
 ```
 
 ## 🚀 Usage
@@ -27,9 +27,9 @@ import { configureRuleEngine } from 'logic-rule-engine';
 import rules from './examples/rules.json';
 
 const defaultContext = {
-  source: "calculator",
-  productId: "10001101",
-  baseProductId: "10001101"
+  source: "evensect",
+  productId: "123344",
+  baseProductId: "123344"
 };
 
 const engine = await configureRuleEngine(rules, {
@@ -45,24 +45,24 @@ console.log(result);
 
 ```json
 {
-  "id": "migration-rule",
+  "id": "section-rule",
   "useFiles": {
     "productFile": {
-      "path": "products/$baseProductId.json",
-      "variable": ["migrationTo"]
+      "path": "$other.json",
+      "variable": ["ageOld"]
     }
   },
   "condition": {
     "and": [
-      { "==": ["$source", "calculator"] },
-      { "==": ["$productId", "10001101"] }
+      { "==": ["$source", "eventTo"] },
+      { "==": ["$productId", "S1234"] }
     ]
   },
   "actions": [
     {
       "type": "assign",
-      "key": "migrations",
-      "value": "$productFile.migrationTo"
+      "key": "chnageTo",
+      "value": "$productFile.dataset"
     }
   ]
 }
@@ -77,6 +77,6 @@ console.log(result);
 
 ## 📁 Dynamic File Loading
 
-Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$baseProductId`.
+Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`.
 
 ---

@@ -1,29 +1,29 @@
 [
   {
-    "id": "migration-rule",
+    "id": "section-rule",
     "useFiles": {
       "productFile": {
-        "path": "$baseProductId.json",
-        "variable": ["migrationTo"]
+        "path": "$product.json",
+        "variable": ["eventsect", "evectus"]
       }
     },
     "condition": {
       "and": [
         { "==": ["$source", "evectus"] },
-        { "==": ["$baseProductId", "123344"] },
-        { "==": ["$agentId", "28325"] }
+        { "==": ["$productId", "123344"] },
+        { "==": ["$employeeId", "28325"] }
       ]
     },
     "actions": [
       {
         "type": "assign",
-        "key": "migration",
-        "value": "$productFile.V1.migrationTo"
+        "key": "reactivate",
+        "value": "$productFile"
       },
       {
         "type": "assign",
-        "key": "sumInsuredIn",
-        "value": "$productFile.V1.sumInsuredIn"
+        "key": "newChangeto",
+        "value": "$productFile"
       }
     ]
   }
