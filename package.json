@@ -26,6 +26,9 @@
     "dynamic-rules",
     "logicguru"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "author": "Sachin Sharma",
   "license": "MIT",
   "repository": {
