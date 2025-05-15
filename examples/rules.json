@@ -1,0 +1,30 @@
+[
+  {
+    "id": "migration-rule",
+    "useFiles": {
+      "productFile": {
+        "path": "$baseProductId.json",
+        "variable": ["migrationTo"]
+      }
+    },
+    "condition": {
+      "and": [
+        { "==": ["$source", "evectus"] },
+        { "==": ["$baseProductId", "123344"] },
+        { "==": ["$agentId", "28325"] }
+      ]
+    },
+    "actions": [
+      {
+        "type": "assign",
+        "key": "migration",
+        "value": "$productFile.V1.migrationTo"
+      },
+      {
+        "type": "assign",
+        "key": "sumInsuredIn",
+        "value": "$productFile.V1.sumInsuredIn"
+      }
+    ]
+  }
+]

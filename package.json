@@ -1,0 +1,47 @@
+{
+  "name": "logicguru-engine",
+  "version": "1.0.0",
+  "description": "Advanced JSON-based rule engine with nested conditions, async evaluation, and flexible action system. Perfect for business rules, workflows, and decision automation.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node examples/usage.js",
+    "dev": "nodemon examples/usage.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.js"
+  },
+  "keywords": [
+    "rule-engine",
+    "rules-engine",
+    "logic-engine",
+    "decision-engine",
+    "json-rules",
+    "business-rules",
+    "automation",
+    "workflow",
+    "conditions",
+    "nested-conditions",
+    "async-rules",
+    "configuration",
+    "dynamic-rules",
+    "logicguru"
+  ],
+  "author": "Sachin Sharma",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Sachinsharmawebdev/logicguru-engine.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Sachinsharmawebdev/logicguru-engine/issues"
+  },
+  "homepage": "https://github.com/Sachinsharmawebdev/logicguru-engine#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "eslint": "^8.0.0",
+    "nodemon": "^3.0.0"
+  }
+}
