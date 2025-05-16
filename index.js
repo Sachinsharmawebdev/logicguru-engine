@@ -1,5 +1,5 @@
-import { evaluateRules } from './evaluate.js';
-import { resolveDynamicFilePath } from './utils/fileLoader.js';
+import { evaluateRules } from './src/evaluate.js';
+import { resolveDynamicFilePath } from './src/utils/fileLoader.js';
 
 export async function configureRuleEngine(rules, options = {}) {
   const { basePath = '', defaultContext = {} } = options;
