@@ -4,13 +4,31 @@ A powerful, async-ready JSON-based logic rule engine for evaluating nested condi
 
 ## ✅ Features
 
-- Nested condition support (AND/OR/==/!=/...).
-- `$` variables resolved from provided context.
-- `$file.variable` for dynamic external data resolution.
-- Preload data from files via `useFiles` config.
-- Support for `log`, `assign`, and custom actions.
-- Fully async-compatible and optimized.
-- Easily configurable for different contexts and sources.
+Nested condition support (AND/OR/==/!=/...)
+
+$ variables resolved from provided context
+
+Template string resolution (${variable} in log messages)
+
+$file.variable for dynamic external data resolution
+
+Preload data from files via useFiles config
+
+Support for multiple action types:
+
+log (with template string support)
+
+assign
+
+update (nested path support)
+
+excludeVal (array value removal)
+
+deleteKey (property deletion)
+
+Fully async-compatible and optimized
+
+Easily configurable for different contexts and sources
 
 ---
 
@@ -29,7 +47,8 @@ import rules from './examples/rules.json';
 const defaultContext = {
   source: "evensect",
   productId: "123344",
-  baseProductId: "123344"
+  baseProductId: "123344",
+  addons: ["1234", "5678"]
 };
 
 const engine = await configureRuleEngine(rules, {
@@ -48,21 +67,35 @@ console.log(result);
   "id": "section-rule",
   "useFiles": {
     "productFile": {
-      "path": "$other.json",
+      "path": "${get.baseProductId}.json",
       "variable": ["ageOld"]
     }
   },
   "condition": {
     "and": [
-      { "==": ["$source", "eventTo"] },
-      { "==": ["$productId", "S1234"] }
+      { "==": ["$get.source", "evectus"] }
     ]
   },
   "actions": [
     {
-      "type": "assign",
-      "key": "chnageTo",
-      "value": "$productFile.dataset"
+      "type": "log",
+      "message": "Processing agent ${get.agentId}"
+    },
+    {
+      "type": "update",
+      "key": "$res.productId",
+      "value": "$get.agentId",
+      "returnKey": "res"
+    },
+    {
+      "type": "excludeVal",
+      "key": "$res.addons",
+      "exclude": "1234",
+      "returnKey": "res.addons"
+    },
+    {
+      "type": "deleteKey",
+      "key": "$temp.oldValue"
     }
   ]
 }
@@ -72,11 +105,76 @@ console.log(result);
 
 ## 🔧 Actions
 
-- **log**: `{ "type": "log", "message": "something" }`
-- **assign**: `{ "type": "assign", "key": "targetKey", "value": "$someKey" }`
+- **log**:
+{ 
+  "type": "log", 
+  "message": "Processing ${variable.path}" 
+}
+- **assign**:
+{ 
+  "type": "assign", 
+  "key": "targetKey", 
+  "value": "$someKey" 
+}
+
+- **update**
+```
+{
+  "type": "update",
+  "key": "$object.nested.path",
+  "value": "$newValue",
+  "returnKey": "resultKey"
+}
+```
+- **excludeVal** //array removal
+```
+{
+  "type": "excludeVal",
+  "key": "$target.array",
+  "exclude": "valueToRemove",
+  "returnKey": "modifiedArray"
+}
+```
+- **excludeVal** //work on object
+```
+{
+  "type": "deleteKey",
+  "key": "$object.keyToRemove",
+  "returnKey":"modifiedobject"
+}
+```
+ 
 
 ## 📁 Dynamic File Loading
 
 Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`.
+Supports useFiles to load data from external JSON dynamically using variable interpolation:
+```
+"useFiles": {
+  "productFile": {
+    "path": "${get.baseProductId}.json",
+    "variable": ["dataset"]
+  }
+}
+```
+🆕 Recent Updates
+Added template string resolution (${}) in log messages
+
+New excludeVal action for array value removal
+
+New deleteKey action for property deletion
+
+Enhanced update action with nested path support
+
+Improved object handling in variable resolution
+
+##For migration from previous versions, ensure your action types follow the new syntax, particularly:
+
+Use exclude instead of value in excludeVal actions
+
+Template strings now work in log messages
+
+Nested paths are fully supported in all actions
+
 
 ---

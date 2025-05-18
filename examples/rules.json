@@ -22,8 +22,22 @@
       {
         "type": "update",
         "key": "$res.productName",
-        "value": "$get.agentId",
+        "value": "$get.agentId"
+      },
+      {
+        "type": "excludeVal",
+        "key": "$res.addon",
+        "exclude": "1234",
         "returnKey":"res"
+      },
+      {
+        "type": "deleteKey",
+        "key": "$res.addon",
+        "returnKey":"res"
+      },
+      {
+        "type": "log",
+        "message": "res:${res}"
       }
     ]
   }

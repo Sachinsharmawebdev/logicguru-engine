@@ -14,6 +14,7 @@ const context = {
     product:["12345", "123456"],
     productId: "123456",
     productName: "health",
+    addon:["1234","0654","5464"]
   }
 };
 
