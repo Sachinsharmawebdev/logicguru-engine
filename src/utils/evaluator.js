@@ -144,23 +144,36 @@ export async function evaluateCondition(condition, context) {
 
 // Keep the existing resolve function as is
 function resolve(value, context) {
-  if (typeof value === "string" && value.startsWith("$")) {
+  if (typeof value !== "string") return value;
+
+  // Handle template-style paths like `${user.name}_slug.json`
+  if (value.includes('${')) {
     try {
-      const path = value.slice(1).split(".");
-      let result = context;
-      for (const key of path) {
-        if (result && Object.prototype.hasOwnProperty.call(result, key)) {
-          result = result[key];
-        } else {
-          console.warn(`⚠️ Missing key '${key}' in path '${value}'`);
-          return undefined;
-        }
-      }
-      return result;
+      // Replace ${path} with resolved values
+      const resolvedPath = value.replace(/\${([^}]+)}/g, (_, path) => {
+        const val = resolve(`$${path}`, context);
+        return val !== undefined ? val : '';
+      });
+      return resolvedPath;
     } catch (err) {
-      console.error("🔥 Error resolving path:", value, err);
+      console.warn(`🚨 Template resolution failed for '${value}'`, err);
       return undefined;
     }
   }
+
+  // Original path resolution for simple $ paths
+  if (value.startsWith('$')) {
+    const path = value.slice(1).split('.');
+    let result = context;
+    for (const key of path) {
+      if (result == null) {
+        console.warn(`Path stopped at '${key}' in '${value}'`);
+        return undefined;
+      }
+      result = result[key];
+    }
+    return result;
+  }
+
   return value;
 }

@@ -3,27 +3,27 @@
     "id": "section-rule",
     "useFiles": {
       "productFile": {
-        "path": "$product.json",
-        "variable": ["eventsect", "evectus"]
+        "path": "${get.baseProductId}.json",
+        "variable": []
       }
     },
     "condition": {
       "and": [
-        { "==": ["$source", "evectus"] },
-        { "==": ["$productId", "123344"] },
-        { "==": ["$employeeId", "28325"] }
+        { "==": ["$get.source", "evectus"] }
       ]
     },
     "actions": [
       {
-        "type": "assign",
-        "key": "reactivate",
-        "value": "$productFile"
+        "type": "update",
+        "key": "$res.productId",
+        "value": "$get.agentId",
+        "returnKey":"res"
       },
       {
-        "type": "assign",
-        "key": "newChangeto",
-        "value": "$productFile"
+        "type": "update",
+        "key": "$res.productName",
+        "value": "$get.agentId",
+        "returnKey":"res"
       }
     ]
   }

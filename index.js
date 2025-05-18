@@ -1,4 +1,5 @@
 import { evaluateRules } from './src/evaluate.js';
+import { resolveFilePath } from './src/utils/filepath.js';
 import { resolveDynamicFilePath } from './src/utils/fileLoader.js';
 
 export async function configureRuleEngine(rules, options = {}) {
@@ -10,8 +11,8 @@ export async function configureRuleEngine(rules, options = {}) {
     for (const rule of rules) {
       if (rule.useFiles) {
         for (const [key, fileConfig] of Object.entries(rule.useFiles)) {
-          const interpolated = fileConfig.path.replace(/\$([a-zA-Z0-9_]+)/g, (_, k) => runtimeContext[k] || k);
-          const fileData = await resolveDynamicFilePath(files, interpolated); //basePath,filename
+          const resolvedPath = await resolveFilePath(fileConfig.path, runtimeContext);
+          const fileData = await resolveDynamicFilePath(files, resolvedPath); 
           runtimeContext[key] = fileData;
         }
       }
