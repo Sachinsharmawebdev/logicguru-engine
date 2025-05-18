@@ -183,7 +183,28 @@ console.log(result);
 
 
 
+
+
+
+**for any `feedback/issue` you can directly mail me on `sachinsharmawebdev@gmail.com` or share issue on `github` by raising a issue on `https://github.com/Sachinsharmawebdev/logicguru-engine/issues`
+
+## 💖 Support Our Open-Source Work
+*If you find this project valuable and would like to support its continued development, please consider:*
+**🌟 Sponsoring via GitHub**
+*Your sponsorship helps us*:
+
+_ **Maintain and improve this project full-time**
+
+- **Add new features and fix bugs faster**
+
+- **Create more high-quality open-source tools**
+
+*Every contribution makes a difference, no matter the size. Together we can build better tools for the developer community.*
+[![GitHub Sponsors](https://img.shields.io/badge/Support-Project-red?logo=github)](https://github.com/sponsors/Sachinsharmawebdev)
+
+
+
 [![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue?logo=github)](https://github.com/Sachinsharmawebdev/logicguru-engine/discussions)
 [![Feedback Welcome](https://img.shields.io/badge/Feedback-Welcome-green)](https://github.com/Sachinsharmawebdev/logicguru-engine/discussions/categories/feedback)
-[![GitHub Sponsors](https://img.shields.io/badge/Support-Project-red?logo=github)](https://github.com/sponsors/Sachinsharmawebdev)
+
 ---
