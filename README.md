@@ -177,4 +177,8 @@ Template strings now work in log messages
 Nested paths are fully supported in all actions
 
 
+
+[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue?logo=github)](https://github.com/Sachinsharmawebdev/logicguru-engine/discussions)
+[![Feedback Welcome](https://img.shields.io/badge/Feedback-Welcome-green)](https://github.com/Sachinsharmawebdev/logicguru-engine/discussions/categories/feedback)
+[![GitHub Sponsors](https://img.shields.io/badge/Support-Project-red?logo=github)](https://github.com/sponsors/Sachinsharmawebdev)
 ---
