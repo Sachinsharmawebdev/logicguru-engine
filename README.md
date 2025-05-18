@@ -1,34 +1,34 @@
 # Logic Rule Engine
 
-A powerful, async-ready JSON-based logic rule engine for evaluating nested conditions, variable bindings, dynamic file loading, and custom actions.
+*A powerful, async-ready JSON-based logic rule engine for evaluating nested conditions, variable bindings, dynamic file loading, and custom actions.*
 
 ## ✅ Features
 
-Nested condition support (AND/OR/==/!=/...)
+- **Nested condition support `(AND/OR/==/!=/...)`**
 
-$ variables resolved from provided context
+- **`$` variables resolved from provided context**
 
-Template string resolution (${variable} in log messages)
+- **Template string resolution (`${variable}` in log messages)**
 
-$file.variable for dynamic external data resolution
+- **`$file.variable` for dynamic external data resolution**
 
-Preload data from files via useFiles config
+- **Preload data from files via useFiles config**
 
-Support for multiple action types:
+*Support for multiple action types:*
 
-log (with template string support)
+- **log (with template string support `${}`)**
 
-assign
+- **`assign` (new object return with result)**
 
-update (nested path support)
+- **`update` (nested path support)**
 
-excludeVal (array value removal)
+- **`excludeVal` (array value removal)**
 
-deleteKey (property deletion)
+- **`deleteKey` (property deletion)**
 
-Fully async-compatible and optimized
+- **Fully async-compatible and optimized**
 
-Easily configurable for different contexts and sources
+- **Easily configurable for different contexts and sources**
 
 ---
 
@@ -105,20 +105,23 @@ console.log(result);
 
 ## 🔧 Actions
 
-- **log**:
+- **log:**
+```json
 { 
   "type": "log", 
   "message": "Processing ${variable.path}" 
 }
-- **assign**:
+```
+- **assign:**
+```json
 { 
   "type": "assign", 
   "key": "targetKey", 
   "value": "$someKey" 
 }
-
-- **update**
 ```
+- **update**
+```json
 {
   "type": "update",
   "key": "$object.nested.path",
@@ -127,7 +130,7 @@ console.log(result);
 }
 ```
 - **excludeVal** //array removal
-```
+```json
 {
   "type": "excludeVal",
   "key": "$target.array",
@@ -136,7 +139,7 @@ console.log(result);
 }
 ```
 - **excludeVal** //work on object
-```
+```json
 {
   "type": "deleteKey",
   "key": "$object.keyToRemove",
@@ -147,9 +150,10 @@ console.log(result);
 
 ## 📁 Dynamic File Loading
 
-Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`.
-Supports useFiles to load data from external JSON dynamically using variable interpolation:
-```
+*Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`.*
+*Supports useFiles to load data from external JSON dynamically using variable interpolation:*
+
+```json
 "useFiles": {
   "productFile": {
     "path": "${get.baseProductId}.json",
@@ -157,24 +161,25 @@ Supports useFiles to load data from external JSON dynamically using variable int
   }
 }
 ```
-🆕 Recent Updates
-Added template string resolution (${}) in log messages
+## 🆕 Recent Updates
 
-New excludeVal action for array value removal
+- **Added template string resolution `(${})` in log messages**
 
-New deleteKey action for property deletion
+- **New `excludeVal` action for array value removal**
 
-Enhanced update action with nested path support
+- **New `deleteKey` action for property deletion**
 
-Improved object handling in variable resolution
+- **Enhanced update action with nested path support**
 
-##For migration from previous versions, ensure your action types follow the new syntax, particularly:
+- **Improved object handling in variable resolution**
 
-Use exclude instead of value in excludeVal actions
+## ensure your action types follow the new syntax, particularly:
 
-Template strings now work in log messages
+- **Use `exclude` instead of `value` in `excludeVal` actions**
 
-Nested paths are fully supported in all actions
+- **Template strings `${}`, now work in log messages**
+
+- **Nested paths are fully supported in all actions**
 
 
 
