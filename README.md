@@ -190,8 +190,10 @@ console.log(result);
 
 ## 💖 Support Our Open-Source Work
 *If you find this project valuable and would like to support its continued development, please consider:*
+
 **🌟 Sponsoring via GitHub**
-*Your sponsorship helps us*:
+
+*Your sponsorship helps us:*
 
 _ **Maintain and improve this project full-time**
 
