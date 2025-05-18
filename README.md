@@ -193,9 +193,9 @@ console.log(result);
 
 **🌟 Sponsoring via GitHub**
 
-*Your sponsorship helps us:*
+**Your sponsorship helps us:**
 
-_ **Maintain and improve this project full-time**
+- **Maintain and improve this project full-time**
 
 - **Add new features and fix bugs faster**
 
