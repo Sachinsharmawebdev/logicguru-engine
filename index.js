@@ -17,7 +17,7 @@ export async function configureRuleEngine(rules, options = {}) {
         }
       }
     }
-
+    
     return await evaluateRules(rules, runtimeContext, files);
   };
 }

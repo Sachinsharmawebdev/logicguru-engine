@@ -31,6 +31,7 @@ async function applyAction(action, context) {
       break;
 
     case 'update': {
+      debugger;
       const updateValue = resolveValue(action.value, context);
       if (updateValue !== undefined) {
         const setValueInContext = (obj, path, value) => {
@@ -56,39 +57,27 @@ async function applyAction(action, context) {
           const returnPath = action.returnKey.startsWith('$')
             ? action.returnKey.slice(1)
             : action.returnKey;
-          result[returnPath] = resolveValue(`$${returnPath}`, context);
+          result = resolveValue(`$${returnPath}`, context);
         }
       }
       break;
     }
-    
+
     case 'excludeVal': {
       const targetPath = action.key.startsWith('$')
         ? action.key.slice(1)
         : action.key;
-      
+
       const excludeValue = resolveValue(action.exclude, context);
       const arrayToModify = resolveValue(action.key, context);
-      
+
       if (Array.isArray(arrayToModify) && excludeValue !== undefined) {
         const newArray = arrayToModify.filter(item => item !== excludeValue);
-        
+
         // Update the context
-        const setValueInContext = (obj, path, value) => {
-          const keys = path.split('.');
-          let current = obj;
-
-          for (let i = 0; i < keys.length - 1; i++) {
-            const key = keys[i];
-            if (!current[key]) current[key] = {};
-            current = current[key];
-          }
-
-          current[keys[keys.length - 1]] = value;
-        };
 
         setValueInContext(context, targetPath, newArray);
-        
+
         // Prepare result
         if (action.returnKey) {
           const returnPath = action.returnKey.startsWith('$')
@@ -101,15 +90,15 @@ async function applyAction(action, context) {
       }
       break;
     }
-    
+
     case 'deleteKey': {
       const targetPath = action.key.startsWith('$')
         ? action.key.slice(1)
         : action.key;
-      
+
       const pathParts = targetPath.split('.');
       let current = context;
-      
+
       // Navigate to the parent of the key to delete
       for (let i = 0; i < pathParts.length - 1; i++) {
         if (current[pathParts[i]] === undefined) {
@@ -118,12 +107,12 @@ async function applyAction(action, context) {
         }
         current = current[pathParts[i]];
       }
-      
+
       // Delete the key
       const keyToDelete = pathParts[pathParts.length - 1];
       if (current[keyToDelete] !== undefined) {
         delete current[keyToDelete];
-        
+
         // Prepare result
         if (action.returnKey) {
           const returnPath = action.returnKey.startsWith('$')
@@ -136,11 +125,90 @@ async function applyAction(action, context) {
       }
       break;
     }
-    
+    // for excluding values from an array
+    // Exclude values from an array based on a property
+    case 'excludeFromArr': {
+      // Resolve paths and values
+      const targetPath = action.target.startsWith('$')
+        ? action.target.slice(1)
+        : action.target;
+
+      const sourceArray = resolveValue(action.source, context);
+      const matchProperty = action.matchProperty;
+      const excludeValue = resolveValue(action.excludeValue, context);
+
+      if (sourceArray && Array.isArray(sourceArray)) {
+        // Convert excludeValue to array if it's not already
+        const excludeValues = Array.isArray(excludeValue)
+          ? excludeValue
+          : [excludeValue];
+
+        // Filter the array
+        const filteredArray = sourceArray.filter(item => {
+          if (typeof item === 'object' && item !== null && matchProperty in item) {
+            return !excludeValues.includes(item[matchProperty]);
+          }
+          return true;
+        });
+
+        // Store result in context
+        setValueInContext(context, targetPath, filteredArray);
+
+        // Prepare return value
+        if (action.returnKey) {
+          const returnPath = action.returnKey.startsWith('$')
+            ? action.returnKey.slice(1)
+            : action.returnKey;
+          result = resolveValue(`$${returnPath}`, context);
+        }
+      }
+      break;
+    }
+
+    // include values in an array
+    case 'includeFromArr': {
+      // Resolve paths and values
+      const targetPath = action.target.startsWith('$')
+        ? action.target.slice(1)
+        : action.target;
+
+      const sourceArray = resolveValue(action.source, context);
+      const matchProperty = action.matchProperty;
+      const includeValue = resolveValue(action.includeValue, context);
+
+      if (sourceArray && Array.isArray(sourceArray)) {
+        // Convert includeValue to array if it's not already
+        const includeValues = Array.isArray(includeValue)
+          ? includeValue
+          : [includeValue];
+
+        // Filter the array to only include matches
+        const includedArray = sourceArray.filter(item => {
+          if (typeof item === 'object' && item !== null && matchProperty in item) {
+            return includeValues.includes(item[matchProperty]);
+          }
+          return false;
+        });
+
+        // Store result in context
+        setValueInContext(context, targetPath, includedArray);
+
+        // Prepare return value
+        if (action.returnKey) {
+          const returnPath = action.returnKey.startsWith('$')
+            ? action.returnKey.slice(1)
+            : action.returnKey;
+          result = resolveValue(`$${returnPath}`, context);
+        }
+      }
+      break;
+    }
+
     default:
       console.warn(`Unknown action type: ${action.type}`);
       break;
   }
+
   return result;
 }
 
@@ -160,6 +228,19 @@ const resolveValue = (value, context) => {
   return value;
 };
 
+// set value in context
+const setValueInContext = (obj, path, value) => {
+  const keys = path.split('.');
+  let current = obj;
+
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i];
+    if (!current[key]) current[key] = {};
+    current = current[key];
+  }
+
+  current[keys[keys.length - 1]] = value;
+};
 
 // New helper function to resolve template strings
 function resolveTemplateString(str, context, options = {}) {
@@ -169,11 +250,11 @@ function resolveTemplateString(str, context, options = {}) {
   } = options;
 
   if (typeof str !== 'string') return str;
-  
+
   return str.replace(/\${([^}]+)}/g, (match, path) => {
     const value = resolveValue(`$${path}`, context);
     if (value === undefined) return match;
-    
+
     if (typeof value === 'object') {
       try {
         return JSON.stringify(value, (key, val) => {

@@ -1,6 +1,6 @@
 # Logic Rule Engine
 
-*A powerful, async-ready JSON-based logic rule engine for evaluating nested conditions, variable bindings, dynamic file loading, and custom actions.*
+_A powerful, async-ready JSON-based logic rule engine for evaluating nested conditions, variable bindings, dynamic file loading, and custom actions._
 
 ## ✅ Features
 
@@ -14,7 +14,7 @@
 
 - **Preload data from files via useFiles config**
 
-*Support for multiple action types:*
+_Support for multiple action types:_
 
 - **log (with template string support `${}`)**
 
@@ -41,19 +41,19 @@ npm install logicguru-engine
 ## 🚀 Usage
 
 ```js
-import { configureRuleEngine } from 'logic-rule-engine';
-import rules from './examples/rules.json';
+import { configureRuleEngine } from "logic-rule-engine";
+import rules from "./examples/rules.json";
 
 const context = {
   source: "evensect",
   productId: "123344",
   baseProductId: "123344",
-  addons: ["1234", "5678"]
+  addons: ["1234", "5678"],
 };
 
 const engine = await configureRuleEngine(rules, {
   basePath: "./data",
-  defaultContext:context
+  defaultContext: context,
 });
 
 const result = await engine();
@@ -72,9 +72,10 @@ console.log(result);
     }
   },
   "condition": {
-    "and": [
-      { "==": ["$get.source", "evectus"] }
-    ]
+    "and": [{ "==": ["$get.source", "evectus"] }],
+    "and": [{ "includeIn": ["$get.agentList", "20001111"] }],
+    "and": [{ "includeKey": ["$get.AdditionalDetails", "noUpsell"] }],
+    "and": [{ "includeVal": ["$get.memberList", "234046574"] }]
   },
   "actions": [
     {
@@ -106,21 +107,26 @@ console.log(result);
 ## 🔧 Actions
 
 - **log:**
+
 ```json
-{ 
-  "type": "log", 
-  "message": "Processing ${variable.path}" 
+{
+  "type": "log",
+  "message": "Processing ${variable.path}"
 }
 ```
+
 - **assign:**
+
 ```json
-{ 
-  "type": "assign", 
-  "key": "targetKey", 
-  "value": "$someKey" 
+{
+  "type": "assign",
+  "key": "targetKey",
+  "value": "$someKey"
 }
 ```
+
 - **update**
+
 ```json
 {
   "type": "update",
@@ -129,7 +135,9 @@ console.log(result);
   "returnKey": "resultKey"
 }
 ```
+
 - **excludeVal** //array removal
+
 ```json
 {
   "type": "excludeVal",
@@ -138,20 +146,21 @@ console.log(result);
   "returnKey": "modifiedArray"
 }
 ```
-- **excludeVal** //work on object
+
+- **deleteKey** //work on object
+
 ```json
 {
   "type": "deleteKey",
   "key": "$object.keyToRemove",
-  "returnKey":"modifiedobject"
+  "returnKey": "modifiedobject"
 }
 ```
- 
 
 ## 📁 Dynamic File Loading
 
-*Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`.*
-*Supports useFiles to load data from external JSON dynamically using variable interpolation:*
+_Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`._
+_Supports useFiles to load data from external JSON dynamically using variable interpolation:_
 
 ```json
 "useFiles": {
@@ -161,6 +170,7 @@ console.log(result);
   }
 }
 ```
+
 ## 🆕 Recent Updates
 
 - **Added template string resolution `(${})` in log messages**
@@ -168,6 +178,12 @@ console.log(result);
 - **New `excludeVal` action for array value removal**
 
 - **New `deleteKey` action for property deletion**
+
+- **New `includeIn` action for array value condition check to find specific value**
+
+- **New `includeKey` action for object property check to find specific key**
+
+- **New `includeVal` action for object property check to find specific value**
 
 - **Enhanced update action with nested path support**
 
@@ -183,13 +199,76 @@ console.log(result);
 
 
 
+-------------------
 
+# Array Filter Actions
 
+## Table of Contents
 
-**for any `feedback/issue` you can directly mail me on `sachinsharmawebdev@gmail.com` or share issue on `github` by raising a issue on `https://github.com/Sachinsharmawebdev/logicguru-engine/issues`
+- [Overview](#overview)
+- [excludeFromArr](#excludefromarr)
+  - [Parameters](#exclude-parameters)
+  - [Examples](#exclude-examples)
+- [includeFromArr](#includefromarr)
+  - [Parameters](#include-parameters)
+  - [Examples](#include-examples)
+
+## Overview
+
+Two specialized actions for filtering arrays of objects:
+
+| Action           | Description                                  |
+| ---------------- | -------------------------------------------- |
+| `excludeFromArr` | Removes objects matching specified values    |
+| `includeFromArr` | Keeps only objects matching specified values |
+
+## excludeFromArr
+
+Removes objects that match specified values from an array.
+
+### Parameters
+
+| Parameter       | Type         | Required | Description                                           |
+| --------------- | ------------ | -------- | ----------------------------------------------------- |
+| `target`        | string       | Yes      | Context path to store results (supports `$` notation) |
+| `source`        | string       | Yes      | Source array path (supports `$` notation)             |
+| `matchProperty` | string       | Yes      | Property name to check in objects                     |
+| `excludeValue`  | string/array | Yes      | Value(s) to exclude                                   |
+| `returnKey`     | string       | No       | Key to return in result object                        |
+
+### Examples
+
+**Basic Usage:**
+
+```json
+{
+  "type": "excludeFromArr",
+  "target": "$res.addon",
+  "source": "$get.data.addon",
+  "matchProperty": "addonId",
+  "excludeValue": ["0654", "1234"],
+  "returnKey": "res"
+}
+```
+
+**Basic Usage:**
+
+```json
+{
+  "type": "includeFromArr",
+  "target": "$res.addon",
+  "source": "$get.data.addon",
+  "matchProperty": "addonId",
+  "includeValue": ["0654", "1234"],
+  "returnKey": "res"
+}
+```
+
+\*\*for any `feedback/issue` you can directly mail me on `sachinsharmawebdev@gmail.com` or share issue on `github` by raising a issue on `https://github.com/Sachinsharmawebdev/logicguru-engine/issues`
 
 ## 💖 Support Our Open-Source Work
-*If you find this project valuable and would like to support its continued development, please consider:*
+
+_If you find this project valuable and would like to support its continued development, please consider:_
 
 **🌟 Sponsoring via GitHub**
 
@@ -201,10 +280,8 @@ console.log(result);
 
 - **Create more high-quality open-source tools**
 
-*Every contribution makes a difference, no matter the size. Together we can build better tools for the developer community.*
+_Every contribution makes a difference, no matter the size. Together we can build better tools for the developer community._
 [![GitHub Sponsors](https://img.shields.io/badge/Support-Project-red?logo=github)](https://github.com/sponsors/Sachinsharmawebdev)
-
-
 
 [![GitHub Discussions](https://img.shields.io/badge/reddit-Discussions-blue?logo=reddit)](https://www.reddit.com/r/LogicGuruEngine/)
 [![Feedback Welcome](https://img.shields.io/badge/reddit)](https://www.reddit.com/r/LogicGuruEngine/)

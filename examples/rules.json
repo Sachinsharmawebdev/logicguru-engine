@@ -8,36 +8,24 @@
       }
     },
     "condition": {
-      "and": [
-        { "==": ["$get.source", "evectus"] }
-      ]
+      "and": [{ "==": ["$get.source", "evectus"] }]
     },
     "actions": [
       {
-        "type": "update",
-        "key": "$res.productId",
-        "value": "$get.agentId",
-        "returnKey":"res"
+        "type": "excludeFromArr",
+        "target": "$res.addon",
+        "source": "$get.data.addon",
+        "matchProperty": "addonId",
+        "excludeValue": ["0654", "1234"],
+        "returnKey": "res"
       },
       {
-        "type": "update",
-        "key": "$res.productName",
-        "value": "$get.agentId"
-      },
-      {
-        "type": "excludeVal",
-        "key": "$res.addon",
-        "exclude": "1234",
-        "returnKey":"res"
-      },
-      {
-        "type": "deleteKey",
-        "key": "$res.addon",
-        "returnKey":"res"
-      },
-      {
-        "type": "log",
-        "message": "res:${res}"
+        "type": "includeFromArr",
+        "target": "$res.addon",
+        "source": "$get.data.addon",
+        "matchProperty": "addonId",
+        "includeValue": ["0654", "1234"],
+        "returnKey": "res"
       }
     ]
   }
