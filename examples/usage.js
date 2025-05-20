@@ -5,12 +5,17 @@ const data = await fs.readFile('./examples/rules.json', 'utf-8');
 const rules = JSON.parse(data);
 
 const context = {
-  "get":{
-    source: "evectus",
-    baseProductId: "123344",
-    agentId: "28325"
+  get:{
+    status:200,
+    message:"success",
+    "data":{
+      product:["12345", "123456"],
+      "productId": "123456",
+      productName: "health",
+      addon:["1234","0654","5464"]
+    }
   },
-  "res":{
+  res:{
     product:["12345", "123456"],
     productId: "123456",
     productName: "health",
@@ -18,6 +23,8 @@ const context = {
   }
 };
 
+console.log("context", context);
+debugger;
 const engine = await configureRuleEngine(rules, {
   basePath: "./data",
   defaultContext: context

@@ -44,7 +44,7 @@ npm install logicguru-engine
 import { configureRuleEngine } from 'logic-rule-engine';
 import rules from './examples/rules.json';
 
-const defaultContext = {
+const context = {
   source: "evensect",
   productId: "123344",
   baseProductId: "123344",
@@ -53,7 +53,7 @@ const defaultContext = {
 
 const engine = await configureRuleEngine(rules, {
   basePath: "./data",
-  defaultContext
+  defaultContext:context
 });
 
 const result = await engine();
@@ -206,7 +206,7 @@ console.log(result);
 
 
 
-[![GitHub Discussions](https://img.shields.io/badge/GitHub-Discussions-blue?logo=github)](https://github.com/Sachinsharmawebdev/logicguru-engine/discussions)
-[![Feedback Welcome](https://img.shields.io/badge/Feedback-Welcome-green)](https://github.com/Sachinsharmawebdev/logicguru-engine/discussions/categories/feedback)
+[![GitHub Discussions](https://img.shields.io/badge/reddit-Discussions-blue?logo=reddit)](https://www.reddit.com/r/LogicGuruEngine/)
+[![Feedback Welcome](https://img.shields.io/badge/reddit)](https://www.reddit.com/r/LogicGuruEngine/)
 
 ---

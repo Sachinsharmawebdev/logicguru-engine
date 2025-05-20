@@ -3,7 +3,7 @@
     "id": "section-rule",
     "useFiles": {
       "productFile": {
-        "path": "${get.baseProductId}.json",
+        "path": "/products/${get.data.productId}_slug.json",
         "variable": []
       }
     },
