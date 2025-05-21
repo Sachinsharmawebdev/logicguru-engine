@@ -31,7 +31,6 @@ async function applyAction(action, context) {
       break;
 
     case 'update': {
-      debugger;
       const updateValue = resolveValue(action.value, context);
       if (updateValue !== undefined) {
         const setValueInContext = (obj, path, value) => {
