@@ -175,20 +175,36 @@ async function applyAction(action, context) {
       const sourceArray = resolveValue(action.source, context);
       const matchProperty = action.matchProperty;
       const includeValue = resolveValue(action.includeValue, context);
+      const includeKeys = action.includeKeys ? resolveValue(action.includeKeys, context) : null;
 
       if (sourceArray && Array.isArray(sourceArray)) {
-        // Convert includeValue to array if it's not already
-        const includeValues = Array.isArray(includeValue)
-          ? includeValue
-          : [includeValue];
+        // Convert values to arrays
+        const includeValues = Array.isArray(includeValue) ? includeValue : [includeValue];
+        const keysToInclude = includeKeys ?
+          (Array.isArray(includeKeys) ? includeKeys : [includeKeys]) :
+          null;
 
-        // Filter the array to only include matches
-        const includedArray = sourceArray.filter(item => {
+        // Filter and transform the array
+        const includedArray = sourceArray.reduce((acc, item) => {
           if (typeof item === 'object' && item !== null && matchProperty in item) {
-            return includeValues.includes(item[matchProperty]);
+            if (includeValues.includes(item[matchProperty])) {
+              if (keysToInclude) {
+                // Create new object with only specified keys
+                const filteredItem = {};
+                keysToInclude.forEach(key => {
+                  if (key in item) {
+                    filteredItem[key] = item[key];
+                  }
+                });
+                acc.push(filteredItem);
+              } else {
+                // Include entire object
+                acc.push(item);
+              }
+            }
           }
-          return false;
-        });
+          return acc;
+        }, []);
 
         // Store result in context
         setValueInContext(context, targetPath, includedArray);

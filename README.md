@@ -156,6 +156,35 @@ console.log(result);
   "returnKey": "modifiedobject"
 }
 ```
+**includeFromArr**
+
+*Filters an array to include only objects matching specified values, with optional key selection.*
+
+### Enhanced Syntax
+```json
+{
+  "type": "includeFromArr",
+  "target": "<output-path>",
+  "source": "<source-array>",
+  "matchProperty": "<property-name>",
+  "includeValue": "<value-or-array>",
+  "includeKeys": ["<key1>", "<key2>"], // Optional
+  "returnKey": "<optional-return-key>"
+}
+```
+**excludeFromArr:**
+
+```json
+{
+  "type": "excludeFromArr",
+  "target": "$res.addon",
+  "source": "$get.data.addon",
+  "matchProperty": "addonId",
+  "excludeValue": ["0654", "1234"],
+  "returnKey": "res"
+}
+```
+
 
 ## 📁 Dynamic File Loading
 
@@ -201,17 +230,6 @@ _Supports useFiles to load data from external JSON dynamically using variable in
 
 -------------------
 
-# Array Filter Actions
-
-## Table of Contents
-
-- [Overview](#overview)
-- [excludeFromArr](#excludefromarr)
-  - [Parameters](#exclude-parameters)
-  - [Examples](#exclude-examples)
-- [includeFromArr](#includefromarr)
-  - [Parameters](#include-parameters)
-  - [Examples](#include-examples)
 
 ## Overview
 
@@ -236,33 +254,9 @@ Removes objects that match specified values from an array.
 | `excludeValue`  | string/array | Yes      | Value(s) to exclude                                   |
 | `returnKey`     | string       | No       | Key to return in result object                        |
 
-### Examples
 
-**Basic Usage:**
 
-```json
-{
-  "type": "excludeFromArr",
-  "target": "$res.addon",
-  "source": "$get.data.addon",
-  "matchProperty": "addonId",
-  "excludeValue": ["0654", "1234"],
-  "returnKey": "res"
-}
-```
 
-**Basic Usage:**
-
-```json
-{
-  "type": "includeFromArr",
-  "target": "$res.addon",
-  "source": "$get.data.addon",
-  "matchProperty": "addonId",
-  "includeValue": ["0654", "1234"],
-  "returnKey": "res"
-}
-```
 
 \*\*for any `feedback/issue` you can directly mail me on `sachinsharmawebdev@gmail.com` or share issue on `github` by raising a issue on `https://github.com/Sachinsharmawebdev/logicguru-engine/issues`
 
