@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine Builder</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            margin: 0;
+            text-align: center;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        textarea {
+            min-height: 150px;
+            font-family: monospace;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        button.secondary {
+            background-color: var(--light);
+            color: var(--dark);
+            border: 1px solid #ddd;
+        }
+        
+        button.danger {
+            background-color: var(--danger);
+        }
+        
+        .rule-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .rule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .rule-title {
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .action-item {
+            background-color: #f8f9fa;
+            border-left: 3px solid var(--primary);
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .condition-item {
+            background-color: #f8f9fa;
+            border-left: 3px solid var(--success);
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .add-btn {
+            margin-top: 10px;
+        }
+        
+        .json-viewer {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .file-upload {
+            margin-bottom: 20px;
+        }
+        
+        .test-section {
+            margin-top: 20px;
+        }
+        
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .flex-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .flex-item {
+            flex: 1;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .condition-type {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .nested-conditions {
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: 2px solid #eee;
+        }
+        
+        .file-inputs {
+            margin-bottom: 15px;
+        }
+        
+        .file-input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .file-input-row input {
+            flex: 1;
+        }
+        
+        @media (max-width: 768px) {
+            .flex-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Rule Engine Builder</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="builder">Rule Builder</div>
+            <div class="tab" data-tab="json">JSON Editor</div>
+            <div class="tab" data-tab="test">Test Rules</div>
+        </div>
+        
+        <div id="builder" class="tab-content active">
+            <div class="form-group">
+                <button id="add-rule">Add New Rule</button>
+                <button id="download-json" class="secondary">Download JSON</button>
+                <button id="upload-json" class="secondary">Upload JSON</button>
+                <input type="file" id="file-upload" class="hidden" accept=".json">
+            </div>
+            
+            <div id="rules-container"></div>
+        </div>
+        
+        <div id="json" class="tab-content">
+            <div class="form-group">
+                <label for="json-editor">JSON Configuration</label>
+                <textarea id="json-editor" class="form-control"></textarea>
+            </div>
+            <button id="apply-json">Apply JSON</button>
+            <button id="download-json-raw" class="secondary">Download JSON</button>
+        </div>
+        
+        <div id="test" class="tab-content">
+            <div class="form-group">
+                <label for="test-data">Test Data (JSON)</label>
+                <textarea id="test-data" class="form-control">{
+  "user": {
+    "name": "John",
+    "age": 30,
+    "roles": ["admin", "user"]
+  },
+  "environment": "production"
+}</textarea>
+            </div>
+            <button id="run-test">Run Test</button>
+            <div id="test-results" class="test-section"></div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelector('.tab.active').classList.remove('active');
+                    document.querySelector('.tab-content.active').classList.remove('active');
+                    
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+            
+            // File upload handling
+            const fileUpload = document.getElementById('file-upload');
+            document.getElementById('upload-json').addEventListener('click', () => fileUpload.click());
+            fileUpload.addEventListener('change', handleFileUpload);
+            
+            // JSON editor buttons
+            document.getElementById('apply-json').addEventListener('click', applyJson);
+            document.getElementById('download-json-raw').addEventListener('click', downloadJsonFromEditor);
+            
+            // Test button
+            document.getElementById('run-test').addEventListener('click', runTest);
+            
+            // Initial setup
+            document.getElementById('add-rule').addEventListener('click', addNewRule);
+            document.getElementById('download-json').addEventListener('click', downloadJson);
+            
+            // Initialize with empty rules
+            let rules = [];
+            renderRules();
+            
+            // Main functions
+            function addNewRule() {
+                rules.push({
+                    name: `Rule ${rules.length + 1}`,
+                    condition: { "==": ["$user.name", "John"] },
+                    actions: [
+                        { type: "log", message: "User is John" }
+                    ],
+                    useFiles: {}
+                });
+                renderRules();
+            }
+            
+            function renderRules() {
+                const container = document.getElementById('rules-container');
+                container.innerHTML = '';
+                
+                rules.forEach((rule, ruleIndex) => {
+                    const ruleElement = document.createElement('div');
+                    ruleElement.className = 'rule-item';
+                    
+                    // Rule header
+                    const ruleHeader = document.createElement('div');
+                    ruleHeader.className = 'rule-header';
+                    
+                    const ruleTitle = document.createElement('div');
+                    ruleTitle.className = 'rule-title';
+                    const titleInput = document.createElement('input');
+                    titleInput.type = 'text';
+                    titleInput.value = rule.name || `Rule ${ruleIndex + 1}`;
+                    titleInput.addEventListener('change', (e) => {
+                        rules[ruleIndex].name = e.target.value;
+                    });
+                    ruleTitle.appendChild(titleInput);
+                    
+                    const ruleActions = document.createElement('div');
+                    const deleteButton = document.createElement('button');
+                    deleteButton.className = 'danger';
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => {
+                        rules.splice(ruleIndex, 1);
+                        renderRules();
+                    });
+                    ruleActions.appendChild(deleteButton);
+                    
+                    ruleHeader.appendChild(ruleTitle);
+                    ruleHeader.appendChild(ruleActions);
+                    
+                    // Condition section
+                    const conditionSection = document.createElement('div');
+                    conditionSection.className = 'form-group';
+                    conditionSection.innerHTML = '<label>Condition</label>';
+                    
+                    const conditionContainer = document.createElement('div');
+                    conditionContainer.id = `condition-${ruleIndex}`;
+                    renderCondition(rule.condition, conditionContainer, ruleIndex);
+                    
+                    const addConditionBtn = document.createElement('button');
+                    addConditionBtn.className = 'add-btn secondary';
+                    addConditionBtn.textContent = 'Add Condition';
+                    addConditionBtn.addEventListener('click', () => {
+                        addNewCondition(ruleIndex);
+                    });
+                    
+                    conditionSection.appendChild(conditionContainer);
+                    conditionSection.appendChild(addConditionBtn);
+                    
+                    // Actions section
+                    const actionsSection = document.createElement('div');
+                    actionsSection.className = 'form-group';
+                    actionsSection.innerHTML = '<label>Actions</label>';
+                    
+                    const actionsContainer = document.createElement('div');
+                    actionsContainer.id = `actions-${ruleIndex}`;
+                    
+                    rule.actions.forEach((action, actionIndex) => {
+                        renderAction(action, actionsContainer, ruleIndex, actionIndex);
+                    });
+                    
+                    const addActionBtn = document.createElement('button');
+                    addActionBtn.className = 'add-btn secondary';
+                    addActionBtn.textContent = 'Add Action';
+                    addActionBtn.addEventListener('click', () => {
+                        addNewAction(ruleIndex);
+                    });
+                    
+                    actionsSection.appendChild(actionsContainer);
+                    actionsSection.appendChild(addActionBtn);
+                    
+                    // Files section
+                    const filesSection = document.createElement('div');
+                    filesSection.className = 'form-group';
+                    filesSection.innerHTML = '<label>Files to Load</label>';
+                    
+                    const filesContainer = document.createElement('div');
+                    filesContainer.className = 'file-inputs';
+                    filesContainer.id = `files-${ruleIndex}`;
+                    
+                    Object.entries(rule.useFiles || {}).forEach(([key, fileConfig], fileIndex) => {
+                        renderFileInput(key, fileConfig, filesContainer, ruleIndex, fileIndex);
+                    });
+                    
+                    const addFileBtn = document.createElement('button');
+                    addFileBtn.className = 'add-btn secondary';
+                    addFileBtn.textContent = 'Add File';
+                    addFileBtn.addEventListener('click', () => {
+                        addNewFile(ruleIndex);
+                    });
+                    
+                    filesSection.appendChild(filesContainer);
+                    filesSection.appendChild(addFileBtn);
+                    
+                    // Assemble rule
+                    ruleElement.appendChild(ruleHeader);
+                    ruleElement.appendChild(conditionSection);
+                    ruleElement.appendChild(actionsSection);
+                    ruleElement.appendChild(filesSection);
+                    
+                    container.appendChild(ruleElement);
+                });
+            }
+            
+            function renderCondition(condition, container, ruleIndex, parentPath = '') {
+                container.innerHTML = '';
+                
+                if (!condition) {
+                    condition = { "==": ["", ""] };
+                    if (parentPath) {
+                        setNestedProperty(rules[ruleIndex], parentPath, condition);
+                    } else {
+                        rules[ruleIndex].condition = condition;
+                    }
+                }
+                
+                const conditionTypes = {
+                    "==": "Equals",
+                    "includeIn": "Value in Array",
+                    "includeKey": "Key in Object",
+                    "includeVal": "Value in Object Values",
+                    "and": "All Of (AND)",
+                    "or": "Any Of (OR)"
+                };
+                
+                const conditionType = Object.keys(condition)[0];
+                
+                const typeSelect = document.createElement('select');
+                typeSelect.className = 'condition-type';
+                
+                Object.entries(conditionTypes).forEach(([key, label]) => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = label;
+                    option.selected = key === conditionType;
+                    typeSelect.appendChild(option);
+                });
+                
+                typeSelect.addEventListener('change', (e) => {
+                    const newType = e.target.value;
+                    let newCondition;
+                    
+                    switch (newType) {
+                        case "==":
+                            newCondition = { "==": ["", ""] };
+                            break;
+                        case "includeIn":
+                            newCondition = { "includeIn": ["", ""] };
+                            break;
+                        case "includeKey":
+                            newCondition = { "includeKey": ["", ""] };
+                            break;
+                        case "includeVal":
+                            newCondition = { "includeVal": ["", ""] };
+                            break;
+                        case "and":
+                            newCondition = { "and": [{ "==": ["", ""] }] };
+                            break;
+                        case "or":
+                            newCondition = { "or": [{ "==": ["", ""] }] };
+                            break;
+                    }
+                    
+                    if (parentPath) {
+                        setNestedProperty(rules[ruleIndex], parentPath, newCondition);
+                    } else {
+                        rules[ruleIndex].condition = newCondition;
+                    }
+                    
+                    renderRules();
+                });
+                
+                container.appendChild(typeSelect);
+                
+                switch (conditionType) {
+                    case "==":
+                    case "includeIn":
+                    case "includeKey":
+                    case "includeVal":
+                        const values = condition[conditionType];
+                        
+                        const leftInput = document.createElement('input');
+                        leftInput.type = 'text';
+                        leftInput.value = values[0];
+                        leftInput.placeholder = 'Left value or path (e.g., $user.name)';
+                        leftInput.addEventListener('change', (e) => {
+                            values[0] = e.target.value;
+                        });
+                        
+                        const rightInput = document.createElement('input');
+                        rightInput.type = 'text';
+                        rightInput.value = values[1];
+                        rightInput.placeholder = 'Right value or path';
+                        rightInput.addEventListener('change', (e) => {
+                            values[1] = e.target.value;
+                        });
+                        
+                        container.appendChild(leftInput);
+                        container.appendChild(rightInput);
+                        break;
+                        
+                    case "and":
+                    case "or":
+                        const conditions = condition[conditionType];
+                        
+                        conditions.forEach((subCondition, index) => {
+                            const conditionItem = document.createElement('div');
+                            conditionItem.className = 'nested-conditions';
+                            
+                            const subContainer = document.createElement('div');
+                            subContainer.id = `sub-condition-${ruleIndex}-${index}`;
+                            
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.className = 'danger';
+                            deleteBtn.textContent = 'Delete';
+                            deleteBtn.style.marginLeft = '10px';
+                            deleteBtn.addEventListener('click', () => {
+                                conditions.splice(index, 1);
+                                renderRules();
+                            });
+                            
+                            renderCondition(subCondition, subContainer, ruleIndex, 
+                                parentPath ? `${parentPath}.${conditionType}[${index}]` : `condition.${conditionType}[${index}]`);
+                            
+                            conditionItem.appendChild(subContainer);
+                            conditionItem.appendChild(deleteBtn);
+                            container.appendChild(conditionItem);
+                        });
+                        
+                        const addSubConditionBtn = document.createElement('button');
+                        addSubConditionBtn.className = 'add-btn secondary';
+                        addSubConditionBtn.textContent = 'Add Nested Condition';
+                        addSubConditionBtn.addEventListener('click', () => {
+                            conditions.push({ "==": ["", ""] });
+                            renderRules();
+                        });
+                        
+                        container.appendChild(addSubConditionBtn);
+                        break;
+                }
+            }
+            
+            function addNewCondition(ruleIndex) {
+                // For simplicity, we'll just reset to a basic equality condition
+                rules[ruleIndex].condition = { "==": ["", ""] };
+                renderRules();
+            }
+            
+            function renderAction(action, container, ruleIndex, actionIndex) {
+                const actionItem = document.createElement('div');
+                actionItem.className = 'action-item';
+                
+                const actionTypes = {
+                    "log": "Log Message",
+                    "assign": "Assign Value",
+                    "update": "Update Value",
+                    "excludeVal": "Exclude Value from Array",
+                    "deleteKey": "Delete Key",
+                    "excludeFromArr": "Exclude from Array by Property",
+                    "includeFromArr": "Include from Array by Property"
+                };
+                
+                const typeSelect = document.createElement('select');
+                Object.entries(actionTypes).forEach(([key, label]) => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = label;
+                    option.selected = key === action.type;
+                    typeSelect.appendChild(option);
+                });
+                
+                typeSelect.addEventListener('change', (e) => {
+                    const newType = e.target.value;
+                    let newAction;
+                    
+                    switch (newType) {
+                        case "log":
+                            newAction = { type: "log", message: "" };
+                            break;
+                        case "assign":
+                            newAction = { type: "assign", key: "", value: "" };
+                            break;
+                        case "update":
+                            newAction = { type: "update", key: "", value: "", returnKey: "" };
+                            break;
+                        case "excludeVal":
+                            newAction = { type: "excludeVal", key: "", exclude: "", returnKey: "" };
+                            break;
+                        case "deleteKey":
+                            newAction = { type: "deleteKey", key: "", returnKey: "" };
+                            break;
+                        case "excludeFromArr":
+                            newAction = { 
+                                type: "excludeFromArr", 
+                                source: "", 
+                                target: "", 
+                                matchProperty: "", 
+                                excludeValue: "", 
+                                returnKey: "" 
+                            };
+                            break;
+                        case "includeFromArr":
+                            newAction = { 
+                                type: "includeFromArr", 
+                                source: "", 
+                                target: "", 
+                                matchProperty: "", 
+                                includeValue: "", 
+                                includeKeys: "", 
+                                returnKey: "" 
+                            };
+                            break;
+                    }
+                    
+                    rules[ruleIndex].actions[actionIndex] = newAction;
+                    renderRules();
+                });
+                
+                actionItem.appendChild(typeSelect);
+                
+                switch (action.type) {
+                    case "log":
+                        const messageInput = document.createElement('input');
+                        messageInput.type = 'text';
+                        messageInput.value = action.message || '';
+                        messageInput.placeholder = 'Message (can use ${templates})';
+                        messageInput.addEventListener('change', (e) => {
+                            action.message = e.target.value;
+                        });
+                        actionItem.appendChild(messageInput);
+                        break;
+                        
+                    case "assign":
+                        const assignKeyInput = document.createElement('input');
+                        assignKeyInput.type = 'text';
+                        assignKeyInput.value = action.key || '';
+                        assignKeyInput.placeholder = 'Key to assign';
+                        assignKeyInput.addEventListener('change', (e) => {
+                            action.key = e.target.value;
+                        });
+                        
+                        const assignValueInput = document.createElement('input');
+                        assignValueInput.type = 'text';
+                        assignValueInput.value = action.value || '';
+                        assignValueInput.placeholder = 'Value or path (e.g., $user.name)';
+                        assignValueInput.addEventListener('change', (e) => {
+                            action.value = e.target.value;
+                        });
+                        
+                        actionItem.appendChild(assignKeyInput);
+                        actionItem.appendChild(assignValueInput);
+                        break;
+                        
+                    case "update":
+                        const updateKeyInput = document.createElement('input');
+                        updateKeyInput.type = 'text';
+                        updateKeyInput.value = action.key || '';
+                        updateKeyInput.placeholder = 'Path to update (e.g., user.name)';
+                        updateKeyInput.addEventListener('change', (e) => {
+                            action.key = e.target.value;
+                        });
+                        
+                        const updateValueInput = document.createElement('input');
+                        updateValueInput.type = 'text';
+                        updateValueInput.value = action.value || '';
+                        updateValueInput.placeholder = 'Value or path';
+                        updateValueInput.addEventListener('change', (e) => {
+                            action.value = e.target.value;
+                        });
+                        
+                        const updateReturnInput = document.createElement('input');
+                        updateReturnInput.type = 'text';
+                        updateReturnInput.value = action.returnKey || '';
+                        updateReturnInput.placeholder = 'Return key (optional)';
+                        updateReturnInput.addEventListener('change', (e) => {
+                            action.returnKey = e.target.value;
+                        });
+                        
+                        actionItem.appendChild(updateKeyInput);
+                        actionItem.appendChild(updateValueInput);
+                        actionItem.appendChild(updateReturnInput);
+                        break;
+                        
+                    case "excludeVal":
+                        const excludeKeyInput = document.createElement('input');
+                        excludeKeyInput.type = 'text';
+                        excludeKeyInput.value = action.key || '';
+                        excludeKeyInput.placeholder = 'Array path (e.g., user.roles)';
+                        excludeKeyInput.addEventListener('change', (e) => {
+                            action.key = e.target.value;
+                        });
+                        
+                        const excludeValueInput = document.createElement('input');
+                        excludeValueInput.type = 'text';
+                        excludeValueInput.value = action.exclude || '';
+                        excludeValueInput.placeholder = 'Value to exclude';
+                        excludeValueInput.addEventListener('change', (e) => {
+                            action.exclude = e.target.value;
+                        });
+                        
+                        const excludeReturnInput = document.createElement('input');
+                        excludeReturnInput.type = 'text';
+                        excludeReturnInput.value = action.returnKey || '';
+                        excludeReturnInput.placeholder = 'Return key (optional)';
+                        excludeReturnInput.addEventListener('change', (e) => {
+                            action.returnKey = e.target.value;
+                        });
+                        
+                        actionItem.appendChild(excludeKeyInput);
+                        actionItem.appendChild(excludeValueInput);
+                        actionItem.appendChild(excludeReturnInput);
+                        break;
+                        
+                    case "deleteKey":
+                        const deleteKeyInput = document.createElement('input');
+                        deleteKeyInput.type = 'text';
+                        deleteKeyInput.value = action.key || '';
+                        deleteKeyInput.placeholder = 'Key path to delete (e.g., user.roles)';
+                        deleteKeyInput.addEventListener('change', (e) => {
+                            action.key = e.target.value;
+                        });
+                        
+                        const deleteReturnInput = document.createElement('input');
+                        deleteReturnInput.type = 'text';
+                        deleteReturnInput.value = action.returnKey || '';
+                        deleteReturnInput.placeholder = 'Return key (optional)';
+                        deleteReturnInput.addEventListener('change', (e) => {
+                            action.returnKey = e.target.value;
+                        });
+                        
+                        actionItem.appendChild(deleteKeyInput);
+                        actionItem.appendChild(deleteReturnInput);
+                        break;
+                        
+                    case "excludeFromArr":
+                        const excludeArrSourceInput = document.createElement('input');
+                        excludeArrSourceInput.type = 'text';
+                        excludeArrSourceInput.value = action.source || '';
+                        excludeArrSourceInput.placeholder = 'Source array path (e.g., $users)';
+                        excludeArrSourceInput.addEventListener('change', (e) => {
+                            action.source = e.target.value;
+                        });
+                        
+                        const excludeArrTargetInput = document.createElement('input');
+                        excludeArrTargetInput.type = 'text';
+                        excludeArrTargetInput.value = action.target || '';
+                        excludeArrTargetInput.placeholder = 'Target path to store result';
+                        excludeArrTargetInput.addEventListener('change', (e) => {
+                            action.target = e.target.value;
+                        });
+                        
+                        const excludeArrPropInput = document.createElement('input');
+                        excludeArrPropInput.type = 'text';
+                        excludeArrPropInput.value = action.matchProperty || '';
+                        excludeArrPropInput.placeholder = 'Property to match against';
+                        excludeArrPropInput.addEventListener('change', (e) => {
+                            action.matchProperty = e.target.value;
+                        });
+                        
+                        const excludeArrValueInput = document.createElement('input');
+                        excludeArrValueInput.type = 'text';
+                        excludeArrValueInput.value = action.excludeValue || '';
+                        excludeArrValueInput.placeholder = 'Value(s) to exclude';
+                        excludeArrValueInput.addEventListener('change', (e) => {
+                            action.excludeValue = e.target.value;
+                        });
+                        
+                        const excludeArrReturnInput = document.createElement('input');
+                        excludeArrReturnInput.type = 'text';
+                        excludeArrReturnInput.value = action.returnKey || '';
+                        excludeArrReturnInput.placeholder = 'Return key (optional)';
+                        excludeArrReturnInput.addEventListener('change', (e) => {
+                            action.returnKey = e.target.value;
+                        });
+                        
+                        actionItem.appendChild(excludeArrSourceInput);
+                        actionItem.appendChild(excludeArrTargetInput);
+                        actionItem.appendChild(excludeArrPropInput);
+                        actionItem.appendChild(excludeArrValueInput);
+                        actionItem.appendChild(excludeArrReturnInput);
+                        break;
+                        
+                    case "includeFromArr":
+                        const includeArrSourceInput = document.createElement('input');
+                        includeArrSourceInput.type = 'text';
+                        includeArrSourceInput.value = action.source || '';
+                        includeArrSourceInput.placeholder = 'Source array path (e.g., $users)';
+                        includeArrSourceInput.addEventListener('change', (e) => {
+                            action.source = e.target.value;
+                        });
+                        
+                        const includeArrTargetInput = document.createElement('input');
+                        includeArrTargetInput.type = 'text';
+                        includeArrTargetInput.value = action.target || '';
+                        includeArrTargetInput.placeholder = 'Target path to store result';
+                        includeArrTargetInput.addEventListener('change', (e) => {
+                            action.target = e.target.value;
+                        });
+                        
+                        const includeArrPropInput = document.createElement('input');
+                        includeArrPropInput.type = 'text';
+                        includeArrPropInput.value = action.matchProperty || '';
+                        includeArrPropInput.placeholder = 'Property to match against';
+                        includeArrPropInput.addEventListener('change', (e) => {
+                            action.matchProperty = e.target.value;
+                        });
+                        
+                        const includeArrValueInput = document.createElement('input');
+                        includeArrValueInput.type = 'text';
+                        includeArrValueInput.value = action.includeValue || '';
+                        includeArrValueInput.placeholder = 'Value(s) to include';
+                        includeArrValueInput.addEventListener('change', (e) => {
+                            action.includeValue = e.target.value;
+                        });
+                        
+                        const includeArrKeysInput = document.createElement('input');
+                        includeArrKeysInput.type = 'text';
+                        includeArrKeysInput.value = action.includeKeys || '';
+                        includeArrKeysInput.placeholder = 'Keys to include (comma separated, optional)';
+                        includeArrKeysInput.addEventListener('change', (e) => {
+                            action.includeKeys = e.target.value;
+                        });
+                        
+                        const includeArrReturnInput = document.createElement('input');
+                        includeArrReturnInput.type = 'text';
+                        includeArrReturnInput.value = action.returnKey || '';
+                        includeArrReturnInput.placeholder = 'Return key (optional)';
+                        includeArrReturnInput.addEventListener('change', (e) => {
+                            action.returnKey = e.target.value;
+                        });
+                        
+                        actionItem.appendChild(includeArrSourceInput);
+                        actionItem.appendChild(includeArrTargetInput);
+                        actionItem.appendChild(includeArrPropInput);
+                        actionItem.appendChild(includeArrValueInput);
+                        actionItem.appendChild(includeArrKeysInput);
+                        actionItem.appendChild(includeArrReturnInput);
+                        break;
+                }
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'danger';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.style.marginTop = '10px';
+                deleteBtn.addEventListener('click', () => {
+                    rules[ruleIndex].actions.splice(actionIndex, 1);
+                    renderRules();
+                });
+                
+                actionItem.appendChild(deleteBtn);
+                container.appendChild(actionItem);
+            }
+            
+            function addNewAction(ruleIndex) {
+                rules[ruleIndex].actions.push({ type: "log", message: "" });
+                renderRules();
+            }
+            
+            function renderFileInput(key, fileConfig, container, ruleIndex, fileIndex) {
+                const fileRow = document.createElement('div');
+                fileRow.className = 'file-input-row';
+                
+                const keyInput = document.createElement('input');
+                keyInput.type = 'text';
+                keyInput.value = key;
+                keyInput.placeholder = 'Context key';
+                keyInput.addEventListener('change', (e) => {
+                    // If key changed, we need to remove old key and add new one
+                    const newKey = e.target.value;
+                    const path = rules[ruleIndex].useFiles[key].path;
+                    delete rules[ruleIndex].useFiles[key];
+                    rules[ruleIndex].useFiles[newKey] = { path };
+                    renderRules();
+                });
+                
+                const pathInput = document.createElement('input');
+                pathInput.type = 'text';
+                pathInput.value = fileConfig.path;
+                pathInput.placeholder = 'File path (can use ${templates})';
+                pathInput.addEventListener('change', (e) => {
+                    rules[ruleIndex].useFiles[key].path = e.target.value;
+                });
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'danger';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    delete rules[ruleIndex].useFiles[key];
+                    renderRules();
+                });
+                
+                fileRow.appendChild(keyInput);
+                fileRow.appendChild(pathInput);
+                fileRow.appendChild(deleteBtn);
+                container.appendChild(fileRow);
+            }
+            
+            function addNewFile(ruleIndex) {
+                if (!rules[ruleIndex].useFiles) {
+                    rules[ruleIndex].useFiles = {};
+                }
+                
+                const newKey = `file${Object.keys(rules[ruleIndex].useFiles).length + 1}`;
+                rules[ruleIndex].useFiles[newKey] = { path: "" };
+                renderRules();
+            }
+            
+            function downloadJson() {
+                const dataStr = JSON.stringify(rules, null, 2);
+                downloadFile('rules.json', dataStr);
+            }
+            
+            function downloadJsonFromEditor() {
+                const dataStr = document.getElementById('json-editor').value;
+                downloadFile('rules.json', dataStr);
+            }
+            
+            function downloadFile(filename, dataStr) {
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+            
+            function handleFileUpload(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const jsonData = JSON.parse(event.target.result);
+                        rules = Array.isArray(jsonData) ? jsonData : [jsonData];
+                        renderRules();
+                        document.getElementById('json-editor').value = JSON.stringify(rules, null, 2);
+                        fileUpload.value = ''; // Reset file input
+                    } catch (error) {
+                        alert('Error parsing JSON file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            }
+            
+            function applyJson() {
+                try {
+                    const jsonData = JSON.parse(document.getElementById('json-editor').value);
+                    rules = Array.isArray(jsonData) ? jsonData : [jsonData];
+                    renderRules();
+                } catch (error) {
+                    alert('Error parsing JSON: ' + error.message);
+                }
+            }
+            
+            function runTest() {
+                try {
+                    const testData = JSON.parse(document.getElementById('test-data').value);
+                    const resultsContainer = document.getElementById('test-results');
+                    resultsContainer.innerHTML = '';
+                    
+                    // Mock the file loading functions for testing
+                    const mockFiles = {
+                        basePath: '',
+                        loadedFiles: {}
+                    };
+                    
+                    const mockResolveFilePath = async (path, context) => {
+                        return path.replace(/\${([^}]+)}|\$([a-zA-Z0-9_.]+)/g, (_, nestedPath, simplePath) => {
+                            const pathToResolve = nestedPath || simplePath;
+                            let result = context;
+                            
+                            for (const key of pathToResolve.split('.')) {
+                                if (result == null) return '';
+                                result = result[key];
+                            }
+                            
+                            return result !== undefined ? result : '';
+                        });
+                    };
+                    
+                    const mockResolveDynamicFilePath = async (files, path) => {
+                        // For testing, just return a mock file content
+                        return { mockFile: true, path };
+                    };
+                    
+                    // Mock the evaluateRules function
+                    const mockEvaluateRules = async (rules, context, files) => {
+                        let resultData = {};
+                        
+                        for (const rule of rules) {
+                            if (rule.useFiles) {
+                                for (const [key, fileConfig] of Object.entries(rule.useFiles)) {
+                                    const resolvedPath = await mockResolveFilePath(fileConfig.path, context);
+                                    const fileData = await mockResolveDynamicFilePath(files, resolvedPath); 
+                                    context[key] = fileData;
+                                }
+                            }
+                        }
+                        
+                        // Mock evaluation - in a real implementation, you'd use your actual evaluateRules function
+                        // This is a simplified version for the UI demo
+                        for (const rule of rules) {
+                            const conditionMet = evaluateMockCondition(rule.condition, { ...context, ...files });
+                            
+                            if (conditionMet) {
+                                for (const action of rule.actions) {
+                                    const actionResult = applyMockAction(action, { ...context, ...files });
+                                    resultData = { ...resultData, ...actionResult };
+                                }
+                            }
+                        }
+                        
+                        return resultData;
+                    };
+                    
+                    // Mock condition evaluation
+                    function evaluateMockCondition(condition, context) {
+                        try {
+                            if (condition.and) {
+                                return condition.and.every(c => evaluateMockCondition(c, context));
+                            }
+                            
+                            if (condition.or) {
+                                return condition.or.some(c => evaluateMockCondition(c, context));
+                            }
+                            
+                            if (condition["=="]) {
+                                const [left, right] = condition["=="];
+                                const resolvedLeft = resolveMockValue(left, context);
+                                const resolvedRight = resolveMockValue(right, context);
+                                return resolvedLeft === resolvedRight;
+                            }
+                            
+                            if (condition.includeIn) {
+                                const [valueToFind, array] = condition.includeIn;
+                                const resolvedValue = resolveMockValue(valueToFind, context);
+                                const resolvedArray = resolveMockValue(array, context);
+                                return Array.isArray(resolvedArray) && resolvedArray.includes(resolvedValue);
+                            }
+                            
+                            if (condition.includeKey) {
+                                const [keyToFind, object] = condition.includeKey;
+                                const resolvedKey = resolveMockValue(keyToFind, context);
+                                const resolvedObject = resolveMockValue(object, context);
+                                return typeof resolvedObject === 'object' && resolvedObject !== null && 
+                                    !Array.isArray(resolvedObject) && resolvedObject.hasOwnProperty(resolvedKey);
+                            }
+                            
+                            if (condition.includeVal) {
+                                const [valueToFind, object] = condition.includeVal;
+                                const resolvedValue = resolveMockValue(valueToFind, context);
+                                const resolvedObject = resolveMockValue(object, context);
+                                return typeof resolvedObject === 'object' && resolvedObject !== null && 
+                                    !Array.isArray(resolvedObject) && Object.values(resolvedObject).includes(resolvedValue);
+                            }
+                            
+                            return false;
+                        } catch (err) {
+                            console.error("Mock condition evaluation error:", err);
+                            return false;
+                        }
+                    }
+                    
+                    function resolveMockValue(value, context) {
+                        if (typeof value !== "string") return value;
+                        
+                        if (value.includes('${')) {
+                            return value.replace(/\${([^}]+)}/g, (_, path) => {
+                                const val = resolveMockValue(`$${path}`, context);
+                                return val !== undefined ? val : '';
+                            });
+                        }
+                        
+                        if (value.startsWith('$')) {
+                            const path = value.slice(1).split('.');
+                            let result = context;
+                            for (const key of path) {
+                                if (result == null) return undefined;
+                                result = result[key];
+                            }
+                            return result;
+                        }
+                        
+                        return value;
+                    }
+                    
+                    // Mock action application
+                    function applyMockAction(action, context) {
+                        let result = {};
+                        
+                        switch (action.type) {
+                            case 'log':
+                                const resolvedMessage = resolveMockTemplateString(action.message, context);
+                                console.log("[TEST LOG]", resolvedMessage);
+                                break;
+                                
+                            case 'assign':
+                                const value = resolveMockValue(action.value, context);
+                                if (value !== undefined) {
+                                    result[action.key] = value;
+                                }
+                                break;
+                                
+                            case 'update': {
+                                const updateValue = resolveMockValue(action.value, context);
+                                if (updateValue !== undefined) {
+                                    const targetPath = action.key.startsWith('$') ? action.key.slice(1) : action.key;
+                                    setMockValueInContext(context, targetPath, updateValue);
+                                    
+                                    if (action.returnKey) {
+                                        const returnPath = action.returnKey.startsWith('$') 
+                                            ? action.returnKey.slice(1) 
+                                            : action.returnKey;
+                                        result = resolveMockValue(`$${returnPath}`, context);
+                                    }
+                                }
+                                break;
+                            }
+                            
+                            // Other action types would be implemented similarly
+                            default:
+                                console.warn(`Mock action type not fully implemented: ${action.type}`);
+                        }
+                        
+                        return result;
+                    }
+                    
+                    function resolveMockTemplateString(str, context) {
+                        if (typeof str !== 'string') return str;
+                        
+                        return str.replace(/\${([^}]+)}/g, (match, path) => {
+                            const value = resolveMockValue(`$${path}`, context);
+                            if (value === undefined) return match;
+                            
+                            if (typeof value === 'object') {
+                                try {
+                                    return JSON.stringify(value);
+                                } catch (e) {
+                                    return '[Circular]';
+                                }
+                            }
+                            return value.toString();
+                        });
+                    }
+                    
+                    function setMockValueInContext(obj, path, value) {
+                        const keys = path.split('.');
+                        let current = obj;
+                        
+                        for (let i = 0; i < keys.length - 1; i++) {
+                            const key = keys[i];
+                            if (!current[key]) current[key] = {};
+                            current = current[key];
+                        }
+                        
+                        current[keys[keys.length - 1]] = value;
+                    }
+                    
+                    // Run the test
+                    mockEvaluateRules(rules, testData, mockFiles)
+                        .then(result => {
+                            const resultDiv = document.createElement('div');
+                            resultDiv.className = 'test-result success';
+                            resultDiv.innerHTML = `
+                                <h3>Test Results</h3>
+                                <p><strong>Input Context:</strong></p>
+                                <pre>${JSON.stringify(testData, null, 2)}</pre>
+                                <p><strong>Output Result:</strong></p>
+                                <pre>${JSON.stringify(result, null, 2)}</pre>
+                            `;
+                            resultsContainer.appendChild(resultDiv);
+                        })
+                        .catch(error => {
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'test-result error';
+                            errorDiv.innerHTML = `
+                                <h3>Test Error</h3>
+                                <p>${error.message}</p>
+                                <pre>${error.stack}</pre>
+                            `;
+                            resultsContainer.appendChild(errorDiv);
+                        });
+                    
+                } catch (error) {
+                    alert('Error in test data: ' + error.message);
+                }
+            }
+            
+            function setNestedProperty(obj, path, value) {
+                const pathParts = path.split('.');
+                let current = obj;
+                
+                for (let i = 0; i < pathParts.length - 1; i++) {
+                    const part = pathParts[i];
+                    
+                    // Handle array indices
+                    const arrayMatch = part.match(/(.+)\[(\d+)\]/);
+                    if (arrayMatch) {
+                        const arrayName = arrayMatch[1];
+                        const arrayIndex = parseInt(arrayMatch[2]);
+                        
+                        if (!current[arrayName]) {
+                            current[arrayName] = [];
+                        }
+                        
+                        if (!current[arrayName][arrayIndex]) {
+                            current[arrayName][arrayIndex] = {};
+                        }
+                        
+                        current = current[arrayName][arrayIndex];
+                    } else {
+                        if (!current[part]) {
+                            current[part] = {};
+                        }
+                        current = current[part];
+                    }
+                }
+                
+                const lastPart = pathParts[pathParts.length - 1];
+                const lastArrayMatch = lastPart.match(/(.+)\[(\d+)\]/);
+                
+                if (lastArrayMatch) {
+                    const arrayName = lastArrayMatch[1];
+                    const arrayIndex = parseInt(lastArrayMatch[2]);
+                    
+                    if (!current[arrayName]) {
+                        current[arrayName] = [];
+                    }
+                    
+                    current[arrayName][arrayIndex] = value;
+                } else {
+                    current[lastPart] = value;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
