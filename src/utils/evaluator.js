@@ -1,3 +1,5 @@
+import { year, month, day } from './dateUtils.js';
+
 export async function evaluateCondition(condition, context) {
   try {
     if (condition.and) {
@@ -39,6 +41,131 @@ export async function evaluateCondition(condition, context) {
       const result = resolvedLeft === resolvedRight;
       if (!result) {
         console.warn(`❌ Equality failed: ${left} === ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
+      return result;
+    }
+
+    if (condition["!="]) {
+      const [left, right] = condition["!="];
+      const resolvedLeft = resolve(left, context);
+      const resolvedRight = resolve(right, context);
+
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn(`⚠️ Variable missing in context:`, {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
+
+      const result = resolvedLeft !== resolvedRight;
+      if (!result) {
+        console.warn(`❌ Inequality failed: ${left} !== ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
+      return result;
+    }
+
+    if (condition[">"]) {
+      const [left, right] = condition[">"];
+      const resolvedLeft = resolve(left, context);
+      const resolvedRight = resolve(right, context);
+
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn(`⚠️ Variable missing in context:`, {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
+
+      const result = resolvedLeft > resolvedRight;
+      if (!result) {
+        console.warn(`❌ Greater than failed: ${left} > ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
+      return result;
+    }
+
+    if (condition["<"]) {
+      const [left, right] = condition["<"];
+      const resolvedLeft = resolve(left, context);
+      const resolvedRight = resolve(right, context);
+
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn(`⚠️ Variable missing in context:`, {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
+
+      const result = resolvedLeft < resolvedRight;
+      if (!result) {
+        console.warn(`❌ Less than failed: ${left} < ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
+      return result;
+    }
+
+    if (condition[">="]) {
+      const [left, right] = condition[">="];
+      const resolvedLeft = resolve(left, context);
+      const resolvedRight = resolve(right, context);
+
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn(`⚠️ Variable missing in context:`, {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
+
+      const result = resolvedLeft >= resolvedRight;
+      if (!result) {
+        console.warn(`❌ Greater than or equal failed: ${left} >= ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
+      return result;
+    }
+
+    if (condition["<="]) {
+      const [left, right] = condition["<="];
+      const resolvedLeft = resolve(left, context);
+      const resolvedRight = resolve(right, context);
+
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn(`⚠️ Variable missing in context:`, {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
+
+      const result = resolvedLeft <= resolvedRight;
+      if (!result) {
+        console.warn(`❌ Less than or equal failed: ${left} <= ${right}`, {
           resolvedLeft,
           resolvedRight,
         });
@@ -146,11 +273,30 @@ export async function evaluateCondition(condition, context) {
 function resolve(value, context) {
   if (typeof value !== "string") return value;
 
-  // Handle template-style paths like `${user.name}_slug.json`
+  // Handle template-style paths like `${user.name}_slug.json` or `${year($res.birthDt)}`
   if (value.includes('${')) {
     try {
       // Replace ${path} with resolved values
       const resolvedPath = value.replace(/\${([^}]+)}/g, (_, path) => {
+        // Check for date functions
+        const yearMatch = path.match(/^year\(([^)]+)\)$/);
+        const monthMatch = path.match(/^month\(([^)]+)\)$/);
+        const dayMatch = path.match(/^day\(([^)]+)\)$/);
+
+        if (yearMatch) {
+          const dateValue = resolve(yearMatch[1], context);
+          return dateValue ? year(dateValue) : '';
+        }
+        if (monthMatch) {
+          const dateValue = resolve(monthMatch[1], context);
+          return dateValue ? month(dateValue) : '';
+        }
+        if (dayMatch) {
+          const dateValue = resolve(dayMatch[1], context);
+          return dateValue ? day(dateValue) : '';
+        }
+
+        // Handle regular path resolution
         const val = resolve(`$${path}`, context);
         return val !== undefined ? val : '';
       });

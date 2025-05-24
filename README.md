@@ -1,36 +1,41 @@
-# Logic Rule Engine
+# Logic Guru Engine
 
 _A powerful, async-ready JSON-based logic rule engine for evaluating nested conditions, variable bindings, dynamic file loading, and custom actions._
 
 ## ✅ Features
 
-- **Nested condition support `(AND/OR/==/!=/...)`**
+- **Nested condition support**
+  - Logical: `and`, `or`
+  - Comparison: `==`, `!=`, `>`, `<`, `>=`, `<=`
+  - Array/Object: `includeIn`, `includeKey`, `includeVal`
 
-- **`$` variables resolved from provided context**
+- **Date Functions**
+  - `year(date)`: Calculate years from date
+  - `month(date)`: Calculate months from date
+  - `day(date)`: Calculate days from date
 
-- **Template string resolution (`${variable}` in log messages)**
+- **Context Variables**
+  - `$` variables resolved from provided context
+  - Template string resolution (`${variable}`)
+  - Date function support (`${year($context.date)}`)
 
-- **`$file.variable` for dynamic external data resolution**
+- **Dynamic File Loading**
+  - `useFiles` for external data resolution
+  - Template path support (`${variable}_slug.json`)
+  - Preload data from files
 
-- **Preload data from files via useFiles config**
-
-_Support for multiple action types:_
-
-- **log (with template string support `${}`)**
-
-- **`assign` (new object return with result)**
-
-- **`update` (nested path support)**
-
-- **`excludeVal` (array value removal)**
-
-- **`deleteKey` (property deletion)**
+- **Action Types**
+  - `log`: Logging with template support
+  - `assign`: Create new object with result
+  - `update`: Update nested paths
+  - `excludeVal`: Remove array values
+  - `deleteKey`: Delete properties
+  - `excludeFromArr`: Filter array by property
+  - `includeFromArr`: Include array items by property
 
 - **Fully async-compatible and optimized**
-
-- **Easily configurable for different contexts and sources**
-
----
+- **TypeScript support**
+- **Comprehensive error handling**
 
 ## 📦 Installation
 
@@ -38,22 +43,36 @@ _Support for multiple action types:_
 npm install logicguru-engine
 ```
 
-## 🚀 Usage
+## 🚀 Basic Usage
 
 ```js
-import { configureRuleEngine } from "logic-rule-engine";
-import rules from "./examples/rules.json";
+import { configureRuleEngine } from "logicguru-engine";
+
+const rules = [
+  {
+    "id": "age-verification",
+    "condition": {
+      "and": [
+        { ">=": ["${year($context.birthDate)}", 18] }
+      ]
+    },
+    "actions": [
+      {
+        "type": "assign",
+        "key": "result.isAdult",
+        "value": true
+      }
+    ]
+  }
+];
 
 const context = {
-  source: "evensect",
-  productId: "123344",
-  baseProductId: "123344",
-  addons: ["1234", "5678"],
+  birthDate: "2000-01-01"
 };
 
 const engine = await configureRuleEngine(rules, {
   basePath: "./data",
-  defaultContext: context,
+  defaultContext: context
 });
 
 const result = await engine();
@@ -64,50 +83,36 @@ console.log(result);
 
 ```json
 {
-  "id": "section-rule",
+  "id": "user-verification",
   "useFiles": {
-    "productFile": {
-      "path": "${get.baseProductId}.json",
-      "variable": ["ageOld"]
+    "configFile": {
+      "path": "/config/${$context.type}_config.json"
     }
   },
   "condition": {
-    "and": [{ "==": ["$get.source", "evectus"] }],
-    "and": [{ "includeIn": ["$get.agentList", "20001111"] }],
-    "and": [{ "includeKey": ["$get.AdditionalDetails", "noUpsell"] }],
-    "and": [{ "includeVal": ["$get.memberList", "234046574"] }]
+    "and": [
+      { ">=": ["${year($context.birthDate)}", 18] },
+      { "!=": ["$context.status", "suspended"] },
+      { "includeIn": ["$context.id", "$configFile.validIds"] }
+    ]
   },
   "actions": [
     {
       "type": "log",
-      "message": "Processing agent ${get.agentId}"
+      "message": "Processing user: ${$context.userId}"
     },
     {
-      "type": "update",
-      "key": "$res.productId",
-      "value": "$get.agentId",
-      "returnKey": "res"
-    },
-    {
-      "type": "excludeVal",
-      "key": "$res.addons",
-      "exclude": "1234",
-      "returnKey": "res.addons"
-    },
-    {
-      "type": "deleteKey",
-      "key": "$temp.oldValue"
+      "type": "assign",
+      "key": "result.isEligible",
+      "value": true
     }
   ]
 }
 ```
 
----
-
 ## 🔧 Actions
 
-- **log:**
-
+### log
 ```json
 {
   "type": "log",
@@ -115,8 +120,7 @@ console.log(result);
 }
 ```
 
-- **assign:**
-
+### assign
 ```json
 {
   "type": "assign",
@@ -125,8 +129,7 @@ console.log(result);
 }
 ```
 
-- **update**
-
+### update
 ```json
 {
   "type": "update",
@@ -136,8 +139,7 @@ console.log(result);
 }
 ```
 
-- **excludeVal** //array removal
-
+### excludeVal
 ```json
 {
   "type": "excludeVal",
@@ -147,116 +149,95 @@ console.log(result);
 }
 ```
 
-- **deleteKey** //work on object
-
+### deleteKey
 ```json
 {
   "type": "deleteKey",
   "key": "$object.keyToRemove",
-  "returnKey": "modifiedobject"
+  "returnKey": "modifiedObject"
 }
 ```
-**includeFromArr**
 
-*Filters an array to include only objects matching specified values, with optional key selection.*
-
-### Enhanced Syntax
-```json
-{
-  "type": "includeFromArr",
-  "target": "<output-path>",
-  "source": "<source-array>",
-  "matchProperty": "<property-name>",
-  "includeValue": "<value-or-array>",
-  "includeKeys": ["<key1>", "<key2>"], // Optional
-  "returnKey": "<optional-return-key>"
-}
-```
-**excludeFromArr:**
-
+### excludeFromArr
 ```json
 {
   "type": "excludeFromArr",
-  "target": "$res.addon",
-  "source": "$get.data.addon",
-  "matchProperty": "addonId",
-  "excludeValue": ["0654", "1234"],
-  "returnKey": "res"
+  "target": "$result.items",
+  "source": "$context.items",
+  "matchProperty": "id",
+  "excludeValue": ["item1", "item2"],
+  "returnKey": "$result.filteredItems"
 }
 ```
 
-
-## 📁 Dynamic File Loading
-
-_Supports `useFiles` to load data from external JSON dynamically using variable interpolation like `$productFile`._
-_Supports useFiles to load data from external JSON dynamically using variable interpolation:_
-
+### includeFromArr
 ```json
-"useFiles": {
-  "productFile": {
-    "path": "${get.baseProductId}.json",
-    "variable": ["dataset"]
+{
+  "type": "includeFromArr",
+  "target": "$result.items",
+  "source": "$context.items",
+  "matchProperty": "id",
+  "includeValue": ["item1", "item2"],
+  "includeKeys": ["id", "name"],
+  "returnKey": "$result.filteredItems"
+}
+```
+
+## 📅 Date Functions
+
+### year
+```json
+{
+  "condition": {
+    ">=": ["${year($context.birthDate)}", 18]
+  }
+}
+```
+
+### month
+```json
+{
+  "condition": {
+    "<": ["${month($context.joinDate)}", 6]
+  }
+}
+```
+
+### day
+```json
+{
+  "condition": {
+    "<=": ["${day($context.trialStartDate)}", 30]
   }
 }
 ```
 
 ## 🆕 Recent Updates
 
-- **Added template string resolution `(${})` in log messages**
+- Added new comparison operators (`!=`, `>`, `<`, `>=`, `<=`)
+- Added date functions (`year`, `month`, `day`)
+- Enhanced error handling and logging
+- Improved TypeScript support
+- Added comprehensive documentation
 
-- **New `excludeVal` action for array value removal**
+## 📚 Documentation
 
-- **New `deleteKey` action for property deletion**
+For detailed documentation, including best practices and examples, see [DOCUMENTATION.md](./DOCUMENTATION.md)
 
-- **New `includeIn` action for array value condition check to find specific value**
+## 🤝 Contributing
 
-- **New `includeKey` action for object property check to find specific key**
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-- **New `includeVal` action for object property check to find specific value**
+## 📝 License
 
-- **Enhanced update action with nested path support**
+MIT License - see the [LICENSE](./LICENSE) file for details.
 
-- **Improved object handling in variable resolution**
+## 💬 Support
 
-## ensure your action types follow the new syntax, particularly:
-
-- **Use `exclude` instead of `value` in `excludeVal` actions**
-
-- **Template strings `${}`, now work in log messages**
-
-- **Nested paths are fully supported in all actions**
-
-
-
--------------------
-
-
-## Overview
-
-Two specialized actions for filtering arrays of objects:
-
-| Action           | Description                                  |
-| ---------------- | -------------------------------------------- |
-| `excludeFromArr` | Removes objects matching specified values    |
-| `includeFromArr` | Keeps only objects matching specified values |
-
-## excludeFromArr
-
-Removes objects that match specified values from an array.
-
-### Parameters
-
-| Parameter       | Type         | Required | Description                                           |
-| --------------- | ------------ | -------- | ----------------------------------------------------- |
-| `target`        | string       | Yes      | Context path to store results (supports `$` notation) |
-| `source`        | string       | Yes      | Source array path (supports `$` notation)             |
-| `matchProperty` | string       | Yes      | Property name to check in objects                     |
-| `excludeValue`  | string/array | Yes      | Value(s) to exclude                                   |
-| `returnKey`     | string       | No       | Key to return in result object                        |
-
-
-
-
+For support, please:
+- Open an issue on GitHub
+- Contact: Sachinsharmawebdev@gmail.com
+- Visit: https://github.com/Sachinsharmawebdev/logicguru-engine
 
 \*\*for any `feedback/issue` you can directly mail me on `sachinsharmawebdev@gmail.com` or share issue on `github` by raising a issue on `https://github.com/Sachinsharmawebdev/logicguru-engine/issues`
 

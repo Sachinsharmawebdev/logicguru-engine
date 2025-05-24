@@ -1,8 +1,9 @@
 {
   "name": "logicguru-engine",
-  "version": "1.2.2",
+  "version": "1.2.4",
   "description": "Advanced JSON-based rule engine with nested conditions, async evaluation, and flexible action system. Perfect for business rules, workflows, and decision automation.",
   "main": "index.js",
+  "types": "index.d.ts",
   "type": "module",
   "scripts": {
     "start": "node examples/usage.js",
