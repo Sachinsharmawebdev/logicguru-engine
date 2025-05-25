@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logic Guru Engine - Powerful JSON-based Rule Engine</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism-tomorrow.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+        }
+        .code-block {
+            background: #2d2d2d;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Hero Section -->
+    <header class="gradient-bg text-white py-20">
+        <div class="container mx-auto px-6">
+            <h1 class="text-5xl font-bold mb-4">Logic Guru Engine</h1>
+            <p class="text-xl mb-8">A powerful, async-ready JSON-based logic rule engine for evaluating nested conditions, variable bindings, and custom actions.</p>
+            <div class="flex space-x-4">
+                <a href="https://www.npmjs.com/package/logicguru-engine" class="bg-white text-gray-800 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">Install from NPM</a>
+                <a href="https://github.com/Sachinsharmawebdev/logicguru-engine" class="bg-gray-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">View on GitHub</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold mb-12 text-center">Key Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Nested Conditions</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Logical: and, or</li>
+                        <li>Comparison: ==, !=, >, <, >=, <=</li>
+                        <li>Array/Object: includeIn, includeKey, includeVal</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Date Functions</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>year(date): Calculate years</li>
+                        <li>month(date): Calculate months</li>
+                        <li>day(date): Calculate days</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Dynamic Actions</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>log: Template-based logging</li>
+                        <li>assign: Create new objects</li>
+                        <li>update: Modify nested paths</li>
+                        <li>excludeVal: Remove array values</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="py-20 bg-gray-100">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold mb-12 text-center">Quick Start</h2>
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-xl font-semibold mb-4">Installation</h3>
+                <pre class="code-block"><code class="language-bash">npm install logicguru-engine</code></pre>
+
+                <h3 class="text-xl font-semibold mb-4 mt-8">Basic Usage</h3>
+                <pre class="code-block"><code class="language-javascript">import { configureRuleEngine } from "logicguru-engine";
+
+const rules = [
+  {
+    "id": "age-verification",
+    "condition": {
+      "and": [
+        { ">=": ["${year($context.birthDate)}", 18] }
+      ]
+    },
+    "actions": [
+      {
+        "type": "assign",
+        "key": "result.isAdult",
+        "value": true
+      }
+    ]
+  }
+];
+
+const context = {
+  birthDate: "2000-01-01"
+};
+
+const engine = await configureRuleEngine(rules, {
+  basePath: "./data",
+  defaultContext: context
+});
+
+const result = await engine();
+console.log(result);</code></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- Advanced Features -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold mb-12 text-center">Advanced Features</h2>
+            <div class="space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Context Variables</h3>
+                    <p class="mb-4">Use $ variables resolved from provided context with template string support:</p>
+                    <pre class="code-block"><code class="language-javascript">{
+  "condition": {
+    "and": [
+      { "==": ["$user.status", "active"] },
+      { ">=": ["${year($user.joinDate)}", 1] }
+    ]
+  }
+}</code></pre>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold mb-4">Dynamic File Loading</h3>
+                    <p class="mb-4">Load external data with template path support:</p>
+                    <pre class="code-block"><code class="language-javascript">{
+  "useFiles": {
+    "configFile": {
+      "path": "/config/${$context.type}_config.json"
+    }
+  }
+}</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Community Section -->
+    <section class="py-20 bg-gray-100">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-8">Join Our Community</h2>
+            <p class="text-xl mb-8">With over 600 weekly downloads and growing, join our community of developers!</p>
+            <div class="flex justify-center space-x-4">
+                <a href="https://github.com/Sachinsharmawebdev/logicguru-engine/issues" class="bg-gray-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">Report Issues</a>
+                <a href="https://github.com/Sachinsharmawebdev/logicguru-engine/discussions" class="bg-gray-800 text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-700 transition">Join Discussions</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold">Logic Guru Engine</h3>
+                    <p class="text-gray-400">MIT License</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="https://github.com/Sachinsharmawebdev/logicguru-engine" class="text-gray-400 hover:text-white transition">GitHub</a>
+                    <a href="https://www.npmjs.com/package/logicguru-engine" class="text-gray-400 hover:text-white transition">NPM</a>
+                    <a href="mailto:sachinsharmawebdev@gmail.com" class="text-gray-400 hover:text-white transition">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-bash.min.js"></script>
+</body>
+</html> 
