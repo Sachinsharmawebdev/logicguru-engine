@@ -5,11 +5,23 @@
   "main": "index.js",
   "types": "index.d.ts",
   "type": "module",
+  "files": [
+    "src",
+    "index.js",
+    "index.d.ts",
+    "LICENSE",
+    "README.md",
+    ".eslintrc.json"
+  ],
   "scripts": {
     "start": "node examples/usage.js",
     "dev": "nodemon examples/usage.js",
-    "test": "jest",
-    "lint": "eslint src/**/*.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
+    "prepublishOnly": "npm test && npm run lint"
   },
   "keywords": [
     "rule-engine",
@@ -48,11 +60,18 @@
     "email": "Sachinsharmawebdev@gmail.com"
   },
   "engines": {
-    "node": ">=22.13.0"
+    "node": ">=16.0.0"
   },
   "devDependencies": {
     "jest": "^29.0.0",
     "eslint": "^8.0.0",
     "nodemon": "^3.0.0"
+  },
+  "jest": {
+    "transform": {},
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
+    "testEnvironment": "node"
   }
 }

@@ -470,7 +470,10 @@
                     "includeKey": "Key in Object",
                     "includeVal": "Value in Object Values",
                     "and": "All Of (AND)",
-                    "or": "Any Of (OR)"
+                    "or": "Any Of (OR)",
+                    "year": "Year Function",
+                    "month": "Month Function",
+                    "day": "Day Function"
                 };
                 
                 const conditionType = Object.keys(condition)[0];
@@ -508,6 +511,15 @@
                             break;
                         case "or":
                             newCondition = { "or": [{ "==": ["", ""] }] };
+                            break;
+                        case "year":
+                            newCondition = { "year": "" };
+                            break;
+                        case "month":
+                            newCondition = { "month": "" };
+                            break;
+                        case "day":
+                            newCondition = { "day": "" };
                             break;
                     }
                     
@@ -547,6 +559,20 @@
                         
                         container.appendChild(leftInput);
                         container.appendChild(rightInput);
+                        break;
+                        
+                    case "year":
+                    case "month":
+                    case "day":
+                        const dateInput = document.createElement('input');
+                        dateInput.type = 'text';
+                        dateInput.value = condition[conditionType] || '';
+                        dateInput.placeholder = 'Date path (e.g., $birthDate)';
+                        dateInput.addEventListener('change', (e) => {
+                            condition[conditionType] = e.target.value;
+                        });
+                        
+                        container.appendChild(dateInput);
                         break;
                         
                     case "and":
@@ -1107,6 +1133,21 @@
                                 const resolvedObject = resolveMockValue(object, context);
                                 return typeof resolvedObject === 'object' && resolvedObject !== null && 
                                     !Array.isArray(resolvedObject) && Object.values(resolvedObject).includes(resolvedValue);
+                            }
+                            
+                            if (condition.year) {
+                                const dateValue = resolveMockValue(condition.year, context);
+                                return dateValue ? new Date(dateValue).getFullYear() : 0;
+                            }
+                            
+                            if (condition.month) {
+                                const dateValue = resolveMockValue(condition.month, context);
+                                return dateValue ? new Date(dateValue).getMonth() + 1 : 0;
+                            }
+                            
+                            if (condition.day) {
+                                const dateValue = resolveMockValue(condition.day, context);
+                                return dateValue ? new Date(dateValue).getDate() : 0;
                             }
                             
                             return false;

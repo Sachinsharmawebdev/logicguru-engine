@@ -1,4 +1,5 @@
 import { evaluateCondition } from './utils/evaluator.js';
+import * as dateUtils from './utils/dateUtils.js';
 
 export async function evaluateRules(rules, context, files = {}) {
   let resultData = {};
@@ -16,212 +17,197 @@ export async function evaluateRules(rules, context, files = {}) {
 
 async function applyAction(action, context) {
   let result = {};
+  let resolvedMessage;
+  let value;
+  let updateValue;
+  let targetPath;
+  let returnPath;
+  let excludeValue;
+  let arrayToModify;
+  let newArray;
+  let pathParts;
+  let current;
+  let keyToDelete;
+  let sourceArray;
+  let matchProperty;
+  let includeValue;
+  let includeKeys;
+  let includeValues;
+  let keysToInclude;
+  let includedArray;
 
   switch (action.type) {
-    case 'log':
-      const resolvedMessage = resolveTemplateString(action.message, context);
-      console.log(resolvedMessage);
-      break;
+  case 'log':
+    resolvedMessage = resolveTemplateString(action.message, context);
+    console.warn(resolvedMessage);
+    break;
 
-    case 'assign':
-      const value = resolveValue(action.value, context);
-      if (value !== undefined) {
-        result[action.key] = value;
-      }
-      break;
-
-    case 'update': {
-      const updateValue = resolveValue(action.value, context);
-      if (updateValue !== undefined) {
-        const setValueInContext = (obj, path, value) => {
-          const keys = path.split('.');
-          let current = obj;
-
-          for (let i = 0; i < keys.length - 1; i++) {
-            const key = keys[i];
-            if (!current[key]) current[key] = {};
-            current = current[key];
-          }
-
-          current[keys[keys.length - 1]] = value;
-        };
-
-        const targetPath = action.key.startsWith('$')
-          ? action.key.slice(1)
-          : action.key;
-
-        setValueInContext(context, targetPath, updateValue);
-
-        if (action.returnKey) {
-          const returnPath = action.returnKey.startsWith('$')
-            ? action.returnKey.slice(1)
-            : action.returnKey;
-          result = resolveValue(`$${returnPath}`, context);
-        }
-      }
-      break;
+  case 'assign':
+    value = resolveTemplateString(action.value, context);
+    if (value !== undefined) {
+      result[action.key] = value;
     }
+    break;
 
-    case 'excludeVal': {
-      const targetPath = action.key.startsWith('$')
+  case 'update': {
+    updateValue = resolveValue(action.value, context);
+    if (updateValue !== undefined) {
+      targetPath = action.key.startsWith('$')
         ? action.key.slice(1)
         : action.key;
 
-      const excludeValue = resolveValue(action.exclude, context);
-      const arrayToModify = resolveValue(action.key, context);
+      setValueInContext(context, targetPath, updateValue);
 
-      if (Array.isArray(arrayToModify) && excludeValue !== undefined) {
-        const newArray = arrayToModify.filter(item => item !== excludeValue);
-
-        // Update the context
-
-        setValueInContext(context, targetPath, newArray);
-
-        // Prepare result
-        if (action.returnKey) {
-          const returnPath = action.returnKey.startsWith('$')
-            ? action.returnKey.slice(1)
-            : action.returnKey;
-          result[returnPath] = resolveValue(`$${returnPath}`, context);
-        } else {
-          result[targetPath] = newArray;
-        }
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$')
+          ? action.returnKey.slice(1)
+          : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
       }
-      break;
+    }
+    break;
+  }
+
+  case 'excludeVal': {
+    targetPath = action.key.startsWith('$')
+      ? action.key.slice(1)
+      : action.key;
+
+    excludeValue = resolveValue(action.exclude, context);
+    arrayToModify = resolveValue(action.key, context);
+
+    if (Array.isArray(arrayToModify) && excludeValue !== undefined) {
+      newArray = arrayToModify.filter((item) => item !== excludeValue);
+
+      setValueInContext(context, targetPath, newArray);
+
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$')
+          ? action.returnKey.slice(1)
+          : action.returnKey;
+        result[returnPath] = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[targetPath] = newArray;
+      }
+    }
+    break;
+  }
+
+  case 'deleteKey': {
+    targetPath = action.key.startsWith('$')
+      ? action.key.slice(1)
+      : action.key;
+
+    pathParts = targetPath.split('.');
+    current = context;
+
+    for (let i = 0; i < pathParts.length - 1; i++) {
+      if (current[pathParts[i]] === undefined) {
+        console.warn(`Path not found: ${targetPath}`);
+        break;
+      }
+      current = current[pathParts[i]];
     }
 
-    case 'deleteKey': {
-      const targetPath = action.key.startsWith('$')
-        ? action.key.slice(1)
-        : action.key;
+    keyToDelete = pathParts[pathParts.length - 1];
+    if (current[keyToDelete] !== undefined) {
+      delete current[keyToDelete];
 
-      const pathParts = targetPath.split('.');
-      let current = context;
-
-      // Navigate to the parent of the key to delete
-      for (let i = 0; i < pathParts.length - 1; i++) {
-        if (current[pathParts[i]] === undefined) {
-          console.warn(`Path not found: ${targetPath}`);
-          break;
-        }
-        current = current[pathParts[i]];
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$')
+          ? action.returnKey.slice(1)
+          : action.returnKey;
+        result[returnPath] = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[keyToDelete] = null;
       }
-
-      // Delete the key
-      const keyToDelete = pathParts[pathParts.length - 1];
-      if (current[keyToDelete] !== undefined) {
-        delete current[keyToDelete];
-
-        // Prepare result
-        if (action.returnKey) {
-          const returnPath = action.returnKey.startsWith('$')
-            ? action.returnKey.slice(1)
-            : action.returnKey;
-          result[returnPath] = resolveValue(`$${returnPath}`, context);
-        } else {
-          result[keyToDelete] = null; // Indicate deletion
-        }
-      }
-      break;
     }
-    // for excluding values from an array
-    // Exclude values from an array based on a property
-    case 'excludeFromArr': {
-      // Resolve paths and values
-      const targetPath = action.target.startsWith('$')
-        ? action.target.slice(1)
-        : action.target;
+    break;
+  }
 
-      const sourceArray = resolveValue(action.source, context);
-      const matchProperty = action.matchProperty;
-      const excludeValue = resolveValue(action.excludeValue, context);
+  case 'excludeFromArr': {
+    targetPath = action.target.startsWith('$')
+      ? action.target.slice(1)
+      : action.target;
 
-      if (sourceArray && Array.isArray(sourceArray)) {
-        // Convert excludeValue to array if it's not already
-        const excludeValues = Array.isArray(excludeValue)
-          ? excludeValue
-          : [excludeValue];
+    sourceArray = resolveValue(action.source, context);
+    matchProperty = action.matchProperty;
+    excludeValue = resolveValue(action.excludeValue, context);
 
-        // Filter the array
-        const filteredArray = sourceArray.filter(item => {
-          if (typeof item === 'object' && item !== null && matchProperty in item) {
-            return !excludeValues.includes(item[matchProperty]);
-          }
-          return true;
-        });
+    if (sourceArray && Array.isArray(sourceArray)) {
+      const excludeValues = Array.isArray(excludeValue)
+        ? excludeValue
+        : [excludeValue];
 
-        // Store result in context
-        setValueInContext(context, targetPath, filteredArray);
-
-        // Prepare return value
-        if (action.returnKey) {
-          const returnPath = action.returnKey.startsWith('$')
-            ? action.returnKey.slice(1)
-            : action.returnKey;
-          result = resolveValue(`$${returnPath}`, context);
+      const filteredArray = sourceArray.filter((item) => {
+        if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
+          return !excludeValues.includes(item[matchProperty]);
         }
+        return true;
+      });
+
+      setValueInContext(context, targetPath, filteredArray);
+
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$')
+          ? action.returnKey.slice(1)
+          : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
       }
-      break;
     }
+    break;
+  }
 
-    // include values in an array
-    case 'includeFromArr': {
-      // Resolve paths and values
-      const targetPath = action.target.startsWith('$')
-        ? action.target.slice(1)
-        : action.target;
+  case 'includeFromArr': {
+    targetPath = action.target.startsWith('$')
+      ? action.target.slice(1)
+      : action.target;
 
-      const sourceArray = resolveValue(action.source, context);
-      const matchProperty = action.matchProperty;
-      const includeValue = resolveValue(action.includeValue, context);
-      const includeKeys = action.includeKeys ? resolveValue(action.includeKeys, context) : null;
+    sourceArray = resolveValue(action.source, context);
+    matchProperty = action.matchProperty;
+    includeValue = resolveValue(action.includeValue, context);
+    includeKeys = action.includeKeys ? resolveValue(action.includeKeys, context) : null;
 
-      if (sourceArray && Array.isArray(sourceArray)) {
-        // Convert values to arrays
-        const includeValues = Array.isArray(includeValue) ? includeValue : [includeValue];
-        const keysToInclude = includeKeys ?
-          (Array.isArray(includeKeys) ? includeKeys : [includeKeys]) :
-          null;
+    if (sourceArray && Array.isArray(sourceArray)) {
+      includeValues = Array.isArray(includeValue) ? includeValue : [includeValue];
+      keysToInclude = includeKeys ?
+        (Array.isArray(includeKeys) ? includeKeys : [includeKeys]) :
+        null;
 
-        // Filter and transform the array
-        const includedArray = sourceArray.reduce((acc, item) => {
-          if (typeof item === 'object' && item !== null && matchProperty in item) {
-            if (includeValues.includes(item[matchProperty])) {
-              if (keysToInclude) {
-                // Create new object with only specified keys
-                const filteredItem = {};
-                keysToInclude.forEach(key => {
-                  if (key in item) {
-                    filteredItem[key] = item[key];
-                  }
-                });
-                acc.push(filteredItem);
-              } else {
-                // Include entire object
-                acc.push(item);
-              }
+      includedArray = sourceArray.reduce((acc, item) => {
+        if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
+          if (includeValues.includes(item[matchProperty])) {
+            if (keysToInclude) {
+              const filteredItem = {};
+              keysToInclude.forEach((key) => {
+                if (Object.prototype.hasOwnProperty.call(item, key)) {
+                  filteredItem[key] = item[key];
+                }
+              });
+              acc.push(filteredItem);
+            } else {
+              acc.push(item);
             }
           }
-          return acc;
-        }, []);
-
-        // Store result in context
-        setValueInContext(context, targetPath, includedArray);
-
-        // Prepare return value
-        if (action.returnKey) {
-          const returnPath = action.returnKey.startsWith('$')
-            ? action.returnKey.slice(1)
-            : action.returnKey;
-          result = resolveValue(`$${returnPath}`, context);
         }
-      }
-      break;
-    }
+        return acc;
+      }, []);
 
-    default:
-      console.warn(`Unknown action type: ${action.type}`);
-      break;
+      setValueInContext(context, targetPath, includedArray);
+
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$')
+          ? action.returnKey.slice(1)
+          : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
+      }
+    }
+    break;
+  }
+
+  default:
+    console.warn(`Unknown action type: ${action.type}`);
+    break;
   }
 
   return result;
@@ -232,7 +218,7 @@ const resolveValue = (value, context) => {
     const path = value.slice(1).split('.');
     let current = context;
     for (const part of path) {
-      if (current && current.hasOwnProperty(part)) {
+      if (current && Object.prototype.hasOwnProperty.call(current, part)) {
         current = current[part];
       } else {
         return undefined;
@@ -258,29 +244,29 @@ const setValueInContext = (obj, path, value) => {
 };
 
 // New helper function to resolve template strings
-function resolveTemplateString(str, context, options = {}) {
-  const {
-    indent = null,      // JSON indentation
-    circular = 'error'   // 'error'|'replace'|'ignore'
-  } = options;
+function resolveTemplateString(template, context) {
+  if (typeof template !== 'string') return template;
 
-  if (typeof str !== 'string') return str;
-
-  return str.replace(/\${([^}]+)}/g, (match, path) => {
-    const value = resolveValue(`$${path}`, context);
-    if (value === undefined) return match;
-
-    if (typeof value === 'object') {
-      try {
-        return JSON.stringify(value, (key, val) => {
-          if (typeof val === 'function') return undefined;
-          if (val === undefined && circular === 'replace') return null;
-          return val;
-        }, indent);
-      } catch (e) {
-        return circular === 'error' ? `[Circular]` : '{}';
-      }
+  // Check for date functions
+  const dateFuncMatch = template.match(/\${(year|month|day)\(([^)]+)\)}/);
+  if (dateFuncMatch) {
+    const [, funcName, datePath] = dateFuncMatch;
+    const dateValue = resolveValue(datePath, context);
+    if (!dateValue) {
+      console.warn(`Date value not found in context: ${datePath}`);
+      return '';
     }
-    return value.toString();
+    const dateFunc = dateUtils[funcName];
+    if (!dateFunc) {
+      console.warn(`Unknown date function: ${funcName}`);
+      return '';
+    }
+    return dateFunc(dateValue);
+  }
+
+  // Handle regular path resolution
+  return template.replace(/\${([^}]+)}/g, (_, path) => {
+    const value = resolveValue(path, context);
+    return value !== undefined ? value : '';
   });
 }
