@@ -11,21 +11,19 @@
   },
   "rules": {
     "indent": ["error", 2],
-    "linebreak-style": ["error", "unix"],
+    "linebreak-style": ["error", "windows"],
     "quotes": ["error", "single"],
     "semi": ["error", "always"],
     "no-unused-vars": ["warn"],
-    "no-console": ["warn", { "allow": ["warn", "error"] }],
-    "no-undef": "error",
-    "no-var": "error",
-    "prefer-const": "warn",
+    "no-console": ["warn"],
+    "no-undef": ["error"],
+    "no-var": ["error"],
+    "prefer-const": ["error"],
     "no-multiple-empty-lines": ["error", { "max": 1 }],
-    "no-trailing-spaces": "error",
+    "no-trailing-spaces": ["error"],
     "eol-last": ["error", "always"],
     "comma-dangle": ["error", "always-multiline"],
     "arrow-parens": ["error", "always"],
-    "arrow-spacing": ["error", { "before": true, "after": true }],
-    "no-duplicate-imports": "error",
-    "import/order": "off"
+    "no-prototype-builtins": ["error"]
   }
 } 
