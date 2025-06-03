@@ -1,6 +1,7 @@
 [
   {
     "id": "section-rule",
+    "debug": true,
     "useFiles": {
       "productFile": {
         "path": "/products/${get.data.productId}_slug.json",
