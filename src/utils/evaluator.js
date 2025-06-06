@@ -13,7 +13,7 @@ export async function evaluateCondition(condition, context, debug = false) {
           const result = await evaluateCondition(c, context, debug);
           await logger(debug, `${result ? '✅' : '❌'} AND subcondition ${index + 1} result:`, { condition: c, result });
           return result;
-        })
+        }),
       );
       const allTrue = results.every(Boolean);
       await logger(debug, `${allTrue ? '✅' : '❌'} AND condition final result:`, { results, allTrue });
@@ -28,7 +28,7 @@ export async function evaluateCondition(condition, context, debug = false) {
           const result = await evaluateCondition(c, context, debug);
           await logger(debug, `${result ? '✅' : '❌'} OR subcondition ${index + 1} result:`, { condition: c, result });
           return result;
-        })
+        }),
       );
       const anyTrue = results.some(Boolean);
       await logger(debug, `${anyTrue ? '✅' : '❌'} OR condition final result:`, { results, anyTrue });
@@ -39,16 +39,16 @@ export async function evaluateCondition(condition, context, debug = false) {
       const [left, right] = condition['=='];
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
-      
+
       await logger(debug, '🔍 Evaluating equality:', {
         original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight }
+        resolved: { left: resolvedLeft, right: resolvedRight },
       });
 
       const result = resolvedLeft === resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Equality result:`, { 
+      await logger(debug, `${result ? '✅' : '❌'} Equality result:`, {
         comparison: `${resolvedLeft} === ${resolvedRight}`,
-        result 
+        result,
       });
       return result;
     }
@@ -60,13 +60,13 @@ export async function evaluateCondition(condition, context, debug = false) {
 
       await logger(debug, '🔍 Evaluating inequality:', {
         original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight }
+        resolved: { left: resolvedLeft, right: resolvedRight },
       });
 
       const result = resolvedLeft !== resolvedRight;
       await logger(debug, `${result ? '✅' : '❌'} Inequality result:`, {
         comparison: `${resolvedLeft} !== ${resolvedRight}`,
-        result
+        result,
       });
       return result;
     }
@@ -78,13 +78,13 @@ export async function evaluateCondition(condition, context, debug = false) {
 
       await logger(debug, '🔍 Evaluating greater than:', {
         original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight }
+        resolved: { left: resolvedLeft, right: resolvedRight },
       });
 
       const result = resolvedLeft > resolvedRight;
       await logger(debug, `${result ? '✅' : '❌'} Greater than result:`, {
         comparison: `${resolvedLeft} > ${resolvedRight}`,
-        result
+        result,
       });
       return result;
     }
@@ -96,13 +96,13 @@ export async function evaluateCondition(condition, context, debug = false) {
 
       await logger(debug, '🔍 Evaluating less than:', {
         original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight }
+        resolved: { left: resolvedLeft, right: resolvedRight },
       });
 
       const result = resolvedLeft < resolvedRight;
       await logger(debug, `${result ? '✅' : '❌'} Less than result:`, {
         comparison: `${resolvedLeft} < ${resolvedRight}`,
-        result
+        result,
       });
       return result;
     }
@@ -114,13 +114,13 @@ export async function evaluateCondition(condition, context, debug = false) {
 
       await logger(debug, '🔍 Evaluating greater than or equal:', {
         original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight }
+        resolved: { left: resolvedLeft, right: resolvedRight },
       });
 
       const result = resolvedLeft >= resolvedRight;
       await logger(debug, `${result ? '✅' : '❌'} Greater than or equal result:`, {
         comparison: `${resolvedLeft} >= ${resolvedRight}`,
-        result
+        result,
       });
       return result;
     }
@@ -132,13 +132,13 @@ export async function evaluateCondition(condition, context, debug = false) {
 
       await logger(debug, '🔍 Evaluating less than or equal:', {
         original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight }
+        resolved: { left: resolvedLeft, right: resolvedRight },
       });
 
       const result = resolvedLeft <= resolvedRight;
       await logger(debug, `${result ? '✅' : '❌'} Less than or equal result:`, {
         comparison: `${resolvedLeft} <= ${resolvedRight}`,
-        result
+        result,
       });
       return result;
     }

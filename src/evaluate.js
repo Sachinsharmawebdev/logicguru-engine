@@ -8,10 +8,10 @@ export async function evaluateRules(rules, context, files = {}) {
   for (const rule of rules) {
     const debug = rule.debug || false;
     await logger(debug, '📝 Starting rule evaluation:', { ruleId: rule.id, context, files });
-    
+
     if (await evaluateCondition(rule.condition, { ...context, ...files }, debug)) {
       await logger(debug, '✅ Rule conditions met, executing actions for rule:', rule.id);
-      
+
       for (const action of rule.actions) {
         await logger(debug, '🔄 Executing action:', { type: action.type, details: action });
         const newResultData = await applyAction(action, { ...context, ...files }, debug);
@@ -41,10 +41,6 @@ async function applyAction(action, context, debug = false) {
   let sourceArray;
   let matchProperty;
   let includeValue;
-  let includeKeys;
-  let includeValues;
-  let keysToInclude;
-  let includedArray;
 
   switch (action.type) {
   case 'log':
@@ -67,7 +63,7 @@ async function applyAction(action, context, debug = false) {
   case 'update': {
     updateValue = resolveValue(action.value, context);
     await logger(debug, '🔄 Update action:', { key: action.key, originalValue: action.value, resolvedValue: updateValue });
-    
+
     if (updateValue !== undefined) {
       targetPath = action.key.startsWith('$') ? action.key.slice(1) : action.key;
       await logger(debug, '📍 Target path:', { original: action.key, resolved: targetPath });
@@ -90,19 +86,19 @@ async function applyAction(action, context, debug = false) {
     targetPath = action.key.startsWith('$') ? action.key.slice(1) : action.key;
     excludeValue = resolveValue(action.exclude, context);
     arrayToModify = resolveValue(action.key, context);
-    
-    await logger(debug, '🗑️ ExcludeVal action:', { 
+
+    await logger(debug, '🗑️ ExcludeVal action:', {
       targetPath,
       excludeValue,
-      originalArray: arrayToModify
+      originalArray: arrayToModify,
     });
 
     if (Array.isArray(arrayToModify) && excludeValue !== undefined) {
       newArray = arrayToModify.filter((item) => item !== excludeValue);
-      await logger(debug, '✂️ Array filtered:', { 
+      await logger(debug, '✂️ Array filtered:', {
         originalLength: arrayToModify.length,
         newLength: newArray.length,
-        excludedValue: excludeValue
+        excludedValue: excludeValue,
       });
 
       setValueInContext(context, targetPath, newArray);
@@ -116,9 +112,9 @@ async function applyAction(action, context, debug = false) {
         await logger(debug, '📤 Result set to new array:', { targetPath, array: newArray });
       }
     } else {
-      await logger(debug, '⚠️ ExcludeVal skipped:', { 
+      await logger(debug, '⚠️ ExcludeVal skipped:', {
         isArray: Array.isArray(arrayToModify),
-        hasExcludeValue: excludeValue !== undefined
+        hasExcludeValue: excludeValue !== undefined,
       });
     }
     break;
@@ -127,7 +123,7 @@ async function applyAction(action, context, debug = false) {
   case 'deleteKey': {
     targetPath = action.key.startsWith('$') ? action.key.slice(1) : action.key;
     await logger(debug, '🗑️ DeleteKey action:', { targetPath });
-    
+
     pathParts = targetPath.split('.');
     current = context;
 
@@ -169,7 +165,7 @@ async function applyAction(action, context, debug = false) {
       targetPath,
       sourceArray,
       matchProperty,
-      excludeValue
+      excludeValue,
     });
 
     if (sourceArray && Array.isArray(sourceArray)) {
@@ -179,16 +175,16 @@ async function applyAction(action, context, debug = false) {
       const filteredArray = sourceArray.filter((item) => {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
           const shouldKeep = !excludeValues.includes(item[matchProperty]);
-logger(debug, '🔍 Checking item:', { item, matchPropertyValue: item[matchProperty], kept: shouldKeep });
+          logger(debug, '🔍 Checking item:', { item, matchPropertyValue: item[matchProperty], kept: shouldKeep });
           return shouldKeep;
         }
         return true;
       });
 
       setValueInContext(context, targetPath, filteredArray);
-      await logger(debug, '✅ Array filtered:', { 
+      await logger(debug, '✅ Array filtered:', {
         originalLength: sourceArray.length,
-        newLength: filteredArray.length
+        newLength: filteredArray.length,
       });
 
       if (action.returnKey) {
@@ -212,7 +208,7 @@ logger(debug, '🔍 Checking item:', { item, matchPropertyValue: item[matchPrope
       targetPath,
       sourceArray,
       matchProperty,
-      includeValue
+      includeValue,
     });
 
     if (sourceArray && Array.isArray(sourceArray)) {
@@ -231,7 +227,7 @@ logger(debug, '🔍 Checking item:', { item, matchPropertyValue: item[matchPrope
       setValueInContext(context, targetPath, includedArray);
       await logger(debug, '✅ Array filtered for inclusion:', {
         originalLength: sourceArray.length,
-        includedLength: includedArray.length
+        includedLength: includedArray.length,
       });
 
       if (action.returnKey) {
