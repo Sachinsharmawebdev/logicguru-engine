@@ -32,6 +32,9 @@ _A powerful, async-ready JSON-based logic rule engine for evaluating nested cond
   - `deleteKey`: Delete properties
   - `excludeFromArr`: Filter array by property
   - `includeFromArr`: Include array items by property
+  - `deleteKeyFromArray`: Delete specific keys from array objects
+  - `updateKeyInArray`: Update specific keys in array objects
+  - `addKeyToArray`: Add new keys to array objects
 
 - **Fully async-compatible and optimized**
 - **TypeScript support**
@@ -180,6 +183,48 @@ console.log(result);
   "includeValue": ["item1", "item2"],
   "includeKeys": ["id", "name"],
   "returnKey": "$result.filteredItems"
+}
+```
+
+### deleteKeyFromArray
+```json
+{
+  "type": "deleteKeyFromArray",
+  "source": "$context.fruits",
+  "target": "fruitsWithoutPrice",
+  "matchProperty": "location",
+  "matchValue": ["India", "Mexico"],
+  "deleteKeys": ["price", "supplier"]
+}
+```
+
+### updateKeyInArray
+```json
+{
+  "type": "updateKeyInArray",
+  "source": "$context.fruits",
+  "target": "updatedFruits",
+  "matchProperty": "location",
+  "matchValue": "USA",
+  "updates": {
+    "price": "$newPrice",
+    "status": "premium"
+  }
+}
+```
+
+### addKeyToArray
+```json
+{
+  "type": "addKeyToArray",
+  "source": "$context.fruits",
+  "target": "fruitsWithDiscount",
+  "matchProperty": "location",
+  "matchValue": ["India", "Brazil"],
+  "additions": {
+    "discount": "20%",
+    "discountPrice": "$discountedPrice"
+  }
 }
 ```
 

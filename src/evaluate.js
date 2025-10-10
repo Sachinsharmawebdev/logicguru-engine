@@ -141,7 +141,11 @@ async function applyAction(action, context) {
 
       const filteredArray = sourceArray.filter((item) => {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
-          return !excludeValues.includes(item[matchProperty]);
+          const itemValue = item[matchProperty];
+          const shouldExclude = excludeValues.some(excludeVal => 
+            Array.isArray(excludeVal) ? excludeVal.includes(itemValue) : itemValue === excludeVal
+          );
+          return !shouldExclude;
         }
         return true;
       });
@@ -176,7 +180,11 @@ async function applyAction(action, context) {
 
       includedArray = sourceArray.reduce((acc, item) => {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
-          if (includeValues.includes(item[matchProperty])) {
+          const itemValue = item[matchProperty];
+          const shouldInclude = includeValues.some(includeVal => 
+            Array.isArray(includeVal) ? includeVal.includes(itemValue) : itemValue === includeVal
+          );
+          if (shouldInclude) {
             if (keysToInclude) {
               const filteredItem = {};
               keysToInclude.forEach((key) => {
@@ -200,6 +208,112 @@ async function applyAction(action, context) {
           ? action.returnKey.slice(1)
           : action.returnKey;
         result = resolveValue(`$${returnPath}`, context);
+      }
+    }
+    break;
+  }
+
+  case 'deleteKeyFromArray': {
+    targetPath = action.target.startsWith('$') ? action.target.slice(1) : action.target;
+    sourceArray = resolveValue(action.source, context);
+    matchProperty = action.matchProperty;
+    const matchValue = resolveValue(action.matchValue, context);
+    const keysToDelete = Array.isArray(action.deleteKeys) ? action.deleteKeys : [action.deleteKeys];
+
+    if (sourceArray && Array.isArray(sourceArray)) {
+      const modifiedArray = sourceArray.map((item) => {
+        if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
+          const itemValue = item[matchProperty];
+          const shouldModify = Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
+          
+          if (shouldModify) {
+            const modifiedItem = { ...item };
+            keysToDelete.forEach(key => delete modifiedItem[key]);
+            return modifiedItem;
+          }
+        }
+        return item;
+      });
+
+      setValueInContext(context, targetPath, modifiedArray);
+      
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[targetPath] = modifiedArray;
+      }
+    }
+    break;
+  }
+
+  case 'updateKeyInArray': {
+    targetPath = action.target.startsWith('$') ? action.target.slice(1) : action.target;
+    sourceArray = resolveValue(action.source, context);
+    matchProperty = action.matchProperty;
+    const matchValue = resolveValue(action.matchValue, context);
+    const updates = action.updates || {};
+
+    if (sourceArray && Array.isArray(sourceArray)) {
+      const modifiedArray = sourceArray.map((item) => {
+        if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
+          const itemValue = item[matchProperty];
+          const shouldModify = Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
+          
+          if (shouldModify) {
+            const modifiedItem = { ...item };
+            for (const [key, value] of Object.entries(updates)) {
+              modifiedItem[key] = resolveValue(value, context);
+            }
+            return modifiedItem;
+          }
+        }
+        return item;
+      });
+
+      setValueInContext(context, targetPath, modifiedArray);
+      
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[targetPath] = modifiedArray;
+      }
+    }
+    break;
+  }
+
+  case 'addKeyToArray': {
+    targetPath = action.target.startsWith('$') ? action.target.slice(1) : action.target;
+    sourceArray = resolveValue(action.source, context);
+    matchProperty = action.matchProperty;
+    const matchValue = resolveValue(action.matchValue, context);
+    const additions = action.additions || {};
+
+    if (sourceArray && Array.isArray(sourceArray)) {
+      const modifiedArray = sourceArray.map((item) => {
+        if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
+          const itemValue = item[matchProperty];
+          const shouldModify = Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
+          
+          if (shouldModify) {
+            const modifiedItem = { ...item };
+            for (const [key, value] of Object.entries(additions)) {
+              modifiedItem[key] = resolveValue(value, context);
+            }
+            return modifiedItem;
+          }
+        }
+        return item;
+      });
+
+      setValueInContext(context, targetPath, modifiedArray);
+      
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[targetPath] = modifiedArray;
       }
     }
     break;
