@@ -12,12 +12,12 @@ export async function configureRuleEngine(rules, options = {}) {
       if (rule.useFiles) {
         for (const [key, fileConfig] of Object.entries(rule.useFiles)) {
           const resolvedPath = await resolveFilePath(fileConfig.path, runtimeContext);
-          const fileData = await resolveDynamicFilePath(files, resolvedPath);
+          const fileData = await resolveDynamicFilePath(files, resolvedPath); 
           runtimeContext[key] = fileData;
         }
       }
     }
-
+    
     return await evaluateRules(rules, runtimeContext, files);
   };
 }

@@ -24,5 +24,5 @@ declare module 'logicguru-engine' {
   export function configureRuleEngine(
     rules: Rule[],
     options?: RuleEngineOptions
-  ): Promise<RuleEngine>;
+  ): RuleEngine;
 } 

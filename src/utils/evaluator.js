@@ -1,37 +1,26 @@
 import { year, month, day } from './dateUtils.js';
-import { logger } from './logger.js';
 
-export async function evaluateCondition(condition, context, debug = false) {
+export async function evaluateCondition(condition, context) {
   try {
-    await logger(debug, '🔍 Evaluating condition:', condition);
-
     if (condition.and) {
-      await logger(debug, '📋 Processing AND condition with subconditions:', condition.and);
       const results = await Promise.all(
-        condition.and.map(async (c, index) => {
-          await logger(debug, `📊 Evaluating AND subcondition ${index + 1}:`, c);
-          const result = await evaluateCondition(c, context, debug);
-          await logger(debug, `${result ? '✅' : '❌'} AND subcondition ${index + 1} result:`, { condition: c, result });
-          return result;
-        }),
+        condition.and.map((c) => evaluateCondition(c, context)),
       );
       const allTrue = results.every(Boolean);
-      await logger(debug, `${allTrue ? '✅' : '❌'} AND condition final result:`, { results, allTrue });
+      if (!allTrue) {
+        console.warn('❌ AND condition failed:', condition.and, results);
+      }
       return allTrue;
     }
 
     if (condition.or) {
-      await logger(debug, '📋 Processing OR condition with subconditions:', condition.or);
       const results = await Promise.all(
-        condition.or.map(async (c, index) => {
-          await logger(debug, `📊 Evaluating OR subcondition ${index + 1}:`, c);
-          const result = await evaluateCondition(c, context, debug);
-          await logger(debug, `${result ? '✅' : '❌'} OR subcondition ${index + 1} result:`, { condition: c, result });
-          return result;
-        }),
+        condition.or.map((c) => evaluateCondition(c, context)),
       );
       const anyTrue = results.some(Boolean);
-      await logger(debug, `${anyTrue ? '✅' : '❌'} OR condition final result:`, { results, anyTrue });
+      if (!anyTrue) {
+        console.warn('❌ OR condition failed:', condition.or, results);
+      }
       return anyTrue;
     }
 
@@ -40,16 +29,23 @@ export async function evaluateCondition(condition, context, debug = false) {
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
 
-      await logger(debug, '🔍 Evaluating equality:', {
-        original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight },
-      });
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
 
       const result = resolvedLeft === resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Equality result:`, {
-        comparison: `${resolvedLeft} === ${resolvedRight}`,
-        result,
-      });
+      if (!result) {
+        console.warn(`❌ Equality failed: ${left} === ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
       return result;
     }
 
@@ -58,16 +54,23 @@ export async function evaluateCondition(condition, context, debug = false) {
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
 
-      await logger(debug, '🔍 Evaluating inequality:', {
-        original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight },
-      });
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
 
       const result = resolvedLeft !== resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Inequality result:`, {
-        comparison: `${resolvedLeft} !== ${resolvedRight}`,
-        result,
-      });
+      if (!result) {
+        console.warn(`❌ Inequality failed: ${left} !== ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
       return result;
     }
 
@@ -76,16 +79,23 @@ export async function evaluateCondition(condition, context, debug = false) {
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
 
-      await logger(debug, '🔍 Evaluating greater than:', {
-        original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight },
-      });
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
 
       const result = resolvedLeft > resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Greater than result:`, {
-        comparison: `${resolvedLeft} > ${resolvedRight}`,
-        result,
-      });
+      if (!result) {
+        console.warn(`❌ Greater than failed: ${left} > ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
       return result;
     }
 
@@ -94,16 +104,23 @@ export async function evaluateCondition(condition, context, debug = false) {
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
 
-      await logger(debug, '🔍 Evaluating less than:', {
-        original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight },
-      });
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
 
       const result = resolvedLeft < resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Less than result:`, {
-        comparison: `${resolvedLeft} < ${resolvedRight}`,
-        result,
-      });
+      if (!result) {
+        console.warn(`❌ Less than failed: ${left} < ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
       return result;
     }
 
@@ -112,16 +129,23 @@ export async function evaluateCondition(condition, context, debug = false) {
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
 
-      await logger(debug, '🔍 Evaluating greater than or equal:', {
-        original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight },
-      });
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
 
       const result = resolvedLeft >= resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Greater than or equal result:`, {
-        comparison: `${resolvedLeft} >= ${resolvedRight}`,
-        result,
-      });
+      if (!result) {
+        console.warn(`❌ Greater than or equal failed: ${left} >= ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
       return result;
     }
 
@@ -130,26 +154,119 @@ export async function evaluateCondition(condition, context, debug = false) {
       const resolvedLeft = resolve(left, context);
       const resolvedRight = resolve(right, context);
 
-      await logger(debug, '🔍 Evaluating less than or equal:', {
-        original: { left, right },
-        resolved: { left: resolvedLeft, right: resolvedRight },
-      });
+      if (resolvedLeft === undefined || resolvedRight === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          left,
+          resolvedLeft,
+          right,
+          resolvedRight,
+        });
+      }
 
       const result = resolvedLeft <= resolvedRight;
-      await logger(debug, `${result ? '✅' : '❌'} Less than or equal result:`, {
-        comparison: `${resolvedLeft} <= ${resolvedRight}`,
-        result,
-      });
+      if (!result) {
+        console.warn(`❌ Less than or equal failed: ${left} <= ${right}`, {
+          resolvedLeft,
+          resolvedRight,
+        });
+      }
+
       return result;
     }
 
-    await logger(debug, '⚠️ No valid condition operator found:', condition);
-    return false;
+    // New includeIn operator (only for arrays)
+    if (condition.includeIn) {
+      const [valueToFind, array] = condition.includeIn;
+      const resolvedValue = resolve(valueToFind, context);
+      const resolvedArray = resolve(array, context);
 
-  } catch (error) {
-    await logger(debug, '❌ Error in condition evaluation:', { error: error.message, condition });
-    throw error;
+      if (resolvedValue === undefined || resolvedArray === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          valueToFind,
+          resolvedValue,
+          array,
+          resolvedArray,
+        });
+        return false;
+      }
+
+      if (!Array.isArray(resolvedArray)) {
+        console.warn('⚠️ includeIn operator expects an array as second argument');
+        return false;
+      }
+
+      const result = resolvedArray.includes(resolvedValue);
+      if (!result) {
+        console.warn(`❌ includeIn failed: ${valueToFind} not found in array`, resolvedArray);
+      }
+
+      return result;
+    }
+
+    // New includeKey operator (checks if key exists in object)
+    if (condition.includeKey) {
+      const [keyToFind, object] = condition.includeKey;
+      const resolvedKey = resolve(keyToFind, context);
+      const resolvedObject = resolve(object, context);
+
+      if (resolvedKey === undefined || resolvedObject === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          keyToFind,
+          resolvedKey,
+          object,
+          resolvedObject,
+        });
+        return false;
+      }
+
+      if (typeof resolvedObject !== 'object' || resolvedObject === null || Array.isArray(resolvedObject)) {
+        console.warn('⚠️ includeKey operator expects an object as second argument');
+        return false;
+      }
+
+      const result = Object.prototype.hasOwnProperty.call(resolvedObject, resolvedKey);
+      if (!result) {
+        console.warn(`❌ includeKey failed: key '${resolvedKey}' not found in object`, resolvedObject);
+      }
+
+      return result;
+    }
+
+    // New includeVal operator (checks if value exists in object's values)
+    if (condition.includeVal) {
+      const [valueToFind, object] = condition.includeVal;
+      const resolvedValue = resolve(valueToFind, context);
+      const resolvedObject = resolve(object, context);
+
+      if (resolvedValue === undefined || resolvedObject === undefined) {
+        console.warn('⚠️ Variable missing in context:', {
+          valueToFind,
+          resolvedValue,
+          object,
+          resolvedObject,
+        });
+        return false;
+      }
+
+      if (typeof resolvedObject !== 'object' || resolvedObject === null || Array.isArray(resolvedObject)) {
+        console.warn('⚠️ includeVal operator expects an object as second argument');
+        return false;
+      }
+
+      const result = Object.values(resolvedObject).includes(resolvedValue);
+      if (!result) {
+        console.warn(`❌ includeVal failed: value '${resolvedValue}' not found in object values`, resolvedObject);
+      }
+
+      return result;
+    }
+  } catch (err) {
+    console.error('🔥 Condition evaluation error:', err, condition);
+    return false;
   }
+
+  console.warn('⚠️ Unrecognized condition structure:', condition);
+  return false;
 }
 
 // Keep the existing resolve function as is
