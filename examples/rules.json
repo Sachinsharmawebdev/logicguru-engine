@@ -1,31 +1,18 @@
 [
   {
-    "id": "section-rule",
-    "useFiles": {
-      "productFile": {
-        "path": "/products/${get.data.productId}_slug.json",
-        "variable": []
-      }
-    },
-    "condition": {
-      "and": [{ "==": ["$get.source", "evectus"] }]
-    },
+    "id": "capture-modified",
+    "condition": { "==": [true, true] },
     "actions": [
       {
-        "type": "excludeFromArr",
-        "target": "$res.addon",
-        "source": "$get.data.addon",
-        "matchProperty": "addonId",
-        "excludeValue": ["0654", "1234"],
-        "returnKey": "res"
-      },
-      {
-        "type": "includeFromArr",
-        "target": "$res.addon",
-        "source": "$get.data.addon",
-        "matchProperty": "addonId",
-        "includeValue": ["0654", "1234"],
-        "returnKey": "res"
+        "type": "updateKeyInArray",
+        "source": "$res.data.addon",
+        "target": "$res.data.addon",
+        "matchProperty": "selected",
+        "returnKey":"res",
+        "matchValue": true,
+        "updates": {
+          "isOTP": false
+        }
       }
     ]
   }

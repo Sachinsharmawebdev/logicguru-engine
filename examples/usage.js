@@ -5,7 +5,7 @@ const data = await fs.readFile('./examples/rules.json', 'utf-8');
 const rules = JSON.parse(data);
 
 const context = {
-  get:{
+  res:{
     status:200,
     message:"success",
     source:"evectus",
@@ -17,24 +17,24 @@ const context = {
       addon:[
         {
           "addonId":"1234",
-          "addonName":"addon1"
+          "addonName":"addon1",
+          "selected": true,
+          "isOTP":true
         },
         {
           "addonId":"0654",
-          "addonName":"addon2"
+          "addonName":"addon2",
+          "selected": true,
+          "isOTP":true
         },
         {
           "addonId":"5464",
-          "addonName":"addon3"
+          "addonName":"addon3",
+          "selected": true,
+          "isOTP":true
         }
       ]
     }
-  },
-  res:{
-    product:["12345", "123456"],
-    productId: "123456",
-    productName: "health",
-    addon:["1234","0654","5464"]
   }
 };
 
@@ -44,4 +44,4 @@ const engine = await configureRuleEngine(rules, {
 });
 
 const result = await engine();
-console.log(result);
+console.log('Result:', JSON.stringify(result, null, 2));

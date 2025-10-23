@@ -3,11 +3,12 @@ import * as dateUtils from './utils/dateUtils.js';
 
 export async function evaluateRules(rules, context, files = {}) {
   let resultData = {};
+  const mergedContext = { ...context, ...files };
 
   for (const rule of rules) {
-    if (await evaluateCondition(rule.condition, { ...context, ...files })) {
+    if (await evaluateCondition(rule.condition, mergedContext)) {
       for (const action of rule.actions) {
-        const newResultData = await applyAction(action, { ...context, ...files });
+        const newResultData = await applyAction(action, mergedContext, context);
         resultData = Object.assign({}, resultData, newResultData);
       }
     }
@@ -15,7 +16,7 @@ export async function evaluateRules(rules, context, files = {}) {
   return resultData;
 }
 
-async function applyAction(action, context) {
+async function applyAction(action, context, originalContext = context) {
   let result = {};
   let resolvedMessage;
   let value;
@@ -142,8 +143,8 @@ async function applyAction(action, context) {
       const filteredArray = sourceArray.filter((item) => {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
           const itemValue = item[matchProperty];
-          const shouldExclude = excludeValues.some(excludeVal => 
-            Array.isArray(excludeVal) ? excludeVal.includes(itemValue) : itemValue === excludeVal
+          const shouldExclude = excludeValues.some((excludeVal) =>
+            Array.isArray(excludeVal) ? excludeVal.includes(itemValue) : itemValue === excludeVal,
           );
           return !shouldExclude;
         }
@@ -181,8 +182,8 @@ async function applyAction(action, context) {
       includedArray = sourceArray.reduce((acc, item) => {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
           const itemValue = item[matchProperty];
-          const shouldInclude = includeValues.some(includeVal => 
-            Array.isArray(includeVal) ? includeVal.includes(itemValue) : itemValue === includeVal
+          const shouldInclude = includeValues.some((includeVal) =>
+            Array.isArray(includeVal) ? includeVal.includes(itemValue) : itemValue === includeVal,
           );
           if (shouldInclude) {
             if (keysToInclude) {
@@ -225,10 +226,10 @@ async function applyAction(action, context) {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
           const itemValue = item[matchProperty];
           const shouldModify = Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
-          
+
           if (shouldModify) {
             const modifiedItem = { ...item };
-            keysToDelete.forEach(key => delete modifiedItem[key]);
+            keysToDelete.forEach((key) => delete modifiedItem[key]);
             return modifiedItem;
           }
         }
@@ -236,7 +237,7 @@ async function applyAction(action, context) {
       });
 
       setValueInContext(context, targetPath, modifiedArray);
-      
+
       if (action.returnKey) {
         returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
         result = resolveValue(`$${returnPath}`, context);
@@ -259,7 +260,7 @@ async function applyAction(action, context) {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
           const itemValue = item[matchProperty];
           const shouldModify = Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
-          
+
           if (shouldModify) {
             const modifiedItem = { ...item };
             for (const [key, value] of Object.entries(updates)) {
@@ -272,7 +273,7 @@ async function applyAction(action, context) {
       });
 
       setValueInContext(context, targetPath, modifiedArray);
-      
+
       if (action.returnKey) {
         returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
         result = resolveValue(`$${returnPath}`, context);
@@ -295,7 +296,7 @@ async function applyAction(action, context) {
         if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
           const itemValue = item[matchProperty];
           const shouldModify = Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
-          
+
           if (shouldModify) {
             const modifiedItem = { ...item };
             for (const [key, value] of Object.entries(additions)) {
@@ -308,7 +309,7 @@ async function applyAction(action, context) {
       });
 
       setValueInContext(context, targetPath, modifiedArray);
-      
+
       if (action.returnKey) {
         returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
         result = resolveValue(`$${returnPath}`, context);
