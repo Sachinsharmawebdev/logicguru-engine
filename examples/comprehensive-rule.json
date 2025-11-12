@@ -1,0 +1,82 @@
+[
+  {
+    "id": "addon-processing-rule",
+    "condition": {
+      "and": [
+        { "==": ["$res.status", 200] },
+        { "==": ["$res.message", "success"] },
+        { "includeIn": ["$res.data.productId", "$res.data.product"] }
+      ]
+    },
+    "actions": [
+      {
+        "type": "log",
+        "message": "Processing product ${$res.data.productName} with ${$res.data.addon.length} addons"
+      },
+      {
+        "type": "filterArray",
+        "source": "$res.data.addon",
+        "target": "selectedAddons",
+        "matchProperty": "selected",
+        "matchValue": true
+      },
+      {
+        "type": "updateKeyInArray",
+        "source": "$selectedAddons",
+        "target": "processedAddons",
+        "matchProperty": "isOTP",
+        "matchValue": true,
+        "updates": {
+          "status": "verified",
+          "processedAt": "2024-01-15T10:30:00Z",
+          "productId": "$res.data.productId"
+        }
+      },
+      {
+        "type": "addKeyToArray",
+        "source": "$processedAddons",
+        "target": "enrichedAddons",
+        "matchProperty": "addonName",
+        "matchValue": ["addon1", "addon2"],
+        "additions": {
+          "priority": "high",
+          "category": "premium",
+          "engentId": "$res.engentId"
+        }
+      },
+      {
+        "type": "deleteKeyFromArray",
+        "source": "$enrichedAddons",
+        "target": "cleanAddons",
+        "matchProperty": "addonName",
+        "matchValue": "addon3",
+        "deleteKeys": ["isOTP", "selected"]
+      },
+      {
+        "type": "filterObject",
+        "source": {
+          "addon1": 150,
+          "addon2": 200,
+          "addon3": 75,
+          "addon4": 300
+        },
+        "target": "premiumAddons",
+        "filterBy": "value",
+        "operator": ">=",
+        "compareValue": 150
+      },
+      {
+        "type": "assign",
+        "key": "result.summary",
+        "value": {
+          "productId": "$res.data.productId",
+          "productName": "$res.data.productName",
+          "totalAddons": 3,
+          "processedCount": 3,
+          "source": "$res.source",
+          "status": "completed"
+        }
+      }
+    ]
+  }
+]

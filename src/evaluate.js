@@ -37,6 +37,7 @@ async function applyAction(action, context, originalContext = context) {
   let keysToInclude;
   let includedArray;
 
+
   switch (action.type) {
   case 'log':
     resolvedMessage = resolveTemplateString(action.message, context);
@@ -44,7 +45,7 @@ async function applyAction(action, context, originalContext = context) {
     break;
 
   case 'assign':
-    value = resolveTemplateString(action.value, context);
+    value = resolveValue(action.value, context);
     if (value !== undefined) {
       result[action.key] = value;
     }
@@ -320,6 +321,111 @@ async function applyAction(action, context, originalContext = context) {
     break;
   }
 
+  case 'filterArray': {
+    targetPath = action.target.startsWith('$') ? action.target.slice(1) : action.target;
+    sourceArray = resolveValue(action.source, context);
+    matchProperty = action.matchProperty;
+    const matchValue = resolveValue(action.matchValue, context);
+    const operator = action.operator || '==';
+
+
+    if (sourceArray && Array.isArray(sourceArray)) {
+      const filteredArray = sourceArray.filter((item) => {
+        if (typeof item === 'object' && item !== null && Object.prototype.hasOwnProperty.call(item, matchProperty)) {
+          const itemValue = item[matchProperty];
+          
+          if (operator === '==') {
+            return Array.isArray(matchValue) ? matchValue.includes(itemValue) : itemValue === matchValue;
+          }
+          
+          let shouldInclude = false;
+          switch (operator) {
+          case '>':
+            shouldInclude = itemValue > matchValue;
+            break;
+          case '<':
+            shouldInclude = itemValue < matchValue;
+            break;
+          case '>=':
+            shouldInclude = itemValue >= matchValue;
+            break;
+          case '<=':
+            shouldInclude = itemValue <= matchValue;
+            break;
+          case '!=':
+            shouldInclude = Array.isArray(matchValue) ? !matchValue.includes(itemValue) : itemValue !== matchValue;
+            break;
+          }
+          return shouldInclude;
+        }
+        return false;
+      });
+
+
+      setValueInContext(context, targetPath, filteredArray);
+
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[targetPath] = filteredArray;
+      }
+    }
+    break;
+  }
+
+  case 'filterObject': {
+    targetPath = action.target.startsWith('$') ? action.target.slice(1) : action.target;
+    const sourceObject = resolveValue(action.source, context);
+    const filterBy = action.filterBy; // 'key' or 'value'
+    const operator = action.operator; // '>', '<', '>=', '<=', '==', '!='
+    const compareValue = resolveValue(action.compareValue, context);
+
+    if (sourceObject && typeof sourceObject === 'object' && !Array.isArray(sourceObject)) {
+      const filteredObject = {};
+      
+      for (const [key, value] of Object.entries(sourceObject)) {
+        const testValue = filterBy === 'key' ? Number(key) : value;
+        let shouldInclude = false;
+        
+        switch (operator) {
+        case '>':
+          shouldInclude = testValue > compareValue;
+          break;
+        case '<':
+          shouldInclude = testValue < compareValue;
+          break;
+        case '>=':
+          shouldInclude = testValue >= compareValue;
+          break;
+        case '<=':
+          shouldInclude = testValue <= compareValue;
+          break;
+        case '==':
+          shouldInclude = testValue == compareValue;
+          break;
+        case '!=':
+          shouldInclude = testValue != compareValue;
+          break;
+        }
+        
+        if (shouldInclude) {
+          filteredObject[key] = value;
+        }
+      }
+
+      setValueInContext(context, targetPath, filteredObject);
+
+      if (action.returnKey) {
+        returnPath = action.returnKey.startsWith('$') ? action.returnKey.slice(1) : action.returnKey;
+        result = resolveValue(`$${returnPath}`, context);
+      } else {
+        result[targetPath] = filteredObject;
+      }
+    }
+    break;
+  }
+
   default:
     console.warn(`Unknown action type: ${action.type}`);
     break;
@@ -341,6 +447,15 @@ const resolveValue = (value, context) => {
     }
     return current;
   }
+  
+  if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+    const resolved = {};
+    for (const [key, val] of Object.entries(value)) {
+      resolved[key] = resolveValue(val, context);
+    }
+    return resolved;
+  }
+  
   return value;
 };
 

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "filter-array-operators-demo",
+    "condition": {
+      "==": [true, true]
+    },
+    "actions": [
+      {
+        "type": "filterArray",
+        "source": "$res.data.addon",
+        "target": "highPriorityAddons",
+        "matchProperty": "addonId",
+        "operator": ">",
+        "matchValue": "1000"
+      },
+      {
+        "type": "assign",
+        "key": "result.summary",
+        "value": {
+          "totalAddons": "$res.data.addon.length",
+          "highPriorityCount": "$highPriorityAddons.length"
+        }
+      }
+    ]
+  }
+]

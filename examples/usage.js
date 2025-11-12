@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import { configureRuleEngine } from '../index.js';
 
-const data = await fs.readFile('./examples/rules.json', 'utf-8');
+const data = await fs.readFile('./filter-array-operators.json', 'utf-8');
 const rules = JSON.parse(data);
 
 const context = {

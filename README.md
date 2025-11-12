@@ -35,6 +35,8 @@ _A powerful, async-ready JSON-based logic rule engine for evaluating nested cond
   - `deleteKeyFromArray`: Delete specific keys from array objects
   - `updateKeyInArray`: Update specific keys in array objects
   - `addKeyToArray`: Add new keys to array objects
+  - `filterArray`: Filter arrays based on conditions
+  - `filterObject`: Filter object key-value pairs based on conditions
 
 - **Fully async-compatible and optimized**
 - **TypeScript support**
@@ -225,6 +227,53 @@ console.log(result);
     "discount": "20%",
     "discountPrice": "$discountedPrice"
   }
+}
+```
+
+### filterArray
+```json
+{
+  "type": "filterArray",
+  "source": "$context.items",
+  "target": "activeItems",
+  "matchProperty": "status",
+  "matchValue": ["active", "pending"]
+}
+```
+
+**With comparison operators:**
+```json
+{
+  "type": "filterArray",
+  "source": "$context.products",
+  "target": "expensiveProducts",
+  "matchProperty": "price",
+  "operator": ">=",
+  "matchValue": 1000
+}
+```
+
+### filterObject
+```json
+{
+  "type": "filterObject",
+  "source": "$sumInsure",
+  "target": "highTierSumInsure",
+  "filterBy": "key",
+  "operator": ">",
+  "compareValue": 6
+}
+```
+
+**Filter by value:**
+```json
+{
+  "type": "filterObject",
+  "source": "$prices",
+  "target": "expensiveItems",
+  "filterBy": "value",
+  "operator": ">=",
+  "compareValue": 100000
 }
 ```
 
